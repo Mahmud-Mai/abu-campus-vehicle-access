@@ -12,17 +12,24 @@ import {
   Flex,
   Stack,
 } from '@chakra-ui/react';
+
 import { navItems } from '../common/Constants';
 import ListChildren from './ListChildren';
+import { BiMenu } from 'react-icons/bi';
 
 const Sidebar = () => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen, onOpen, onClose } = useDisclosure(true);
   const btnRef = React.useRef();
 
   return (
     <>
-      <Button ref={btnRef} colorScheme="teal" onClick={onOpen}>
-        Open
+      <Button
+        ref={btnRef}
+        onClick={onOpen}
+        bg={'none'}
+        sx={{ position: 'absolute', left: 5, top: 2 }}
+      >
+        <BiMenu size="lg" />
       </Button>
       <Drawer
         isOpen={isOpen}
@@ -39,7 +46,14 @@ const Sidebar = () => {
           <DrawerBody>
             <Stack as="ul" textDecoration={'none'} spacing={'15px'} pt={'2rem'}>
               {navItems.map(({ text, icon, link }) => {
-                return <ListChildren text={text} icon={icon} link={link} />;
+                return (
+                  <ListChildren
+                    key={text}
+                    text={text}
+                    icon={icon}
+                    link={link}
+                  />
+                );
               })}
             </Stack>
           </DrawerBody>
