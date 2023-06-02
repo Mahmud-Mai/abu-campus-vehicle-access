@@ -40,28 +40,21 @@ const CheckIn = () => {
   ];
 
   const doOCR = async picture => {
-    await worker.load();
-    await worker.loadLanguage('eng');
-    await worker.initialize('eng');
-    const {
-      data: { text },
-    } = await worker.recognize(picture);
-    setOcr(text);
+    if (picture) {
+      await worker.load();
+      await worker.loadLanguage('eng');
+      await worker.initialize('eng');
+      const {
+        data: { text },
+      } = await worker.recognize(picture);
+      setOcr(text);
+    }
   };
 
   const [ocr, setOcr] = useState('Recognizing...');
   useEffect(() => {
     doOCR(picture);
   }, [picture]);
-
-  // useEffect(() => {
-  //   Tesseract.recognize(picture, 'eng', { logger: m => console.log(m) }).then(
-  //     ({ data: { text } }) => {
-  //       console.log('🚀 ~ file: CheckIn.jsx:44 ~ ).then ~ text:', text);
-  //       setOcr(text);
-  //     }
-  //   );
-  // }, [picture]);
 
   return (
     <Box>
