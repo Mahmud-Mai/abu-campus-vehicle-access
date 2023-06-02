@@ -1,21 +1,18 @@
-import React, { useCallback, useRef, useState } from 'react';
-import {
-  Box,
-  // Button,
-  // ButtonGroup,
-  // Card,
-  // CardBody,
-  // CardFooter,
-  // Heading,
-} from '@chakra-ui/react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Box, Text } from '@chakra-ui/react';
 import CamComponent from '../../components/CamComponent';
 import CardComponent from '../../components/CardComponent';
+import { createWorker } from 'tesseract.js';
 
 const videoConstraints = {
   width: 400,
   height: 400,
   facingMode: 'environment',
 };
+
+const worker = await createWorker({
+  logger: m => console.log(m),
+});
 
 const CheckIn = () => {
   const [picture, setPicture] = useState('');
@@ -42,6 +39,30 @@ const CheckIn = () => {
     },
   ];
 
+  const doOCR = async picture => {
+    await worker.load();
+    await worker.loadLanguage('eng');
+    await worker.initialize('eng');
+    const {
+      data: { text },
+    } = await worker.recognize(picture);
+    setOcr(text);
+  };
+
+  const [ocr, setOcr] = useState('Recognizing...');
+  useEffect(() => {
+    doOCR(picture);
+  }, [picture]);
+
+  // useEffect(() => {
+  //   Tesseract.recognize(picture, 'eng', { logger: m => console.log(m) }).then(
+  //     ({ data: { text } }) => {
+  //       console.log('🚀 ~ file: CheckIn.jsx:44 ~ ).then ~ text:', text);
+  //       setOcr(text);
+  //     }
+  //   );
+  // }, [picture]);
+
   return (
     <Box>
       {picture === '' ? (
@@ -61,6 +82,7 @@ const CheckIn = () => {
         <Box>
           <CardComponent title={'PREVIEW PLATE NUMBER'} props={btnArray}>
             <img src={picture} alt="plate number img" />
+            <Text>Recognized Text: {ocr}</Text>
           </CardComponent>
         </Box>
       )}
