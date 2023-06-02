@@ -1,12 +1,12 @@
 import React, { useCallback, useRef, useState } from 'react';
 import {
   Box,
-  Button,
-  ButtonGroup,
-  Card,
-  CardBody,
-  CardFooter,
-  Heading,
+  // Button,
+  // ButtonGroup,
+  // Card,
+  // CardBody,
+  // CardFooter,
+  // Heading,
 } from '@chakra-ui/react';
 import CamComponent from '../../components/CamComponent';
 import CardComponent from '../../components/CardComponent';
@@ -26,6 +26,22 @@ const CheckIn = () => {
     setPicture(pictureSrc);
   }, [webcamRef]);
 
+  const reCapture = () => {
+    setPicture('');
+  };
+
+  const btnArray = [
+    {
+      key: 0,
+      btnText: 'Recapture',
+      btnAction: reCapture,
+    },
+    {
+      key: 1,
+      btnText: 'Generate Ticket',
+    },
+  ];
+
   return (
     <Box>
       {picture === '' ? (
@@ -33,7 +49,7 @@ const CheckIn = () => {
           <CardComponent
             title={'SNAP PLATE NUMBER'}
             btnAction={capture}
-            btnText={'Snap'}
+            btnText={'Capture'}
           >
             <CamComponent
               webcamRef={webcamRef}
@@ -42,43 +58,11 @@ const CheckIn = () => {
           </CardComponent>
         </Box>
       ) : (
-        // <Card mx={'auto'} maxW="xl" variant={'elevated'} align={'center'} p={5}>
-        //   <Heading as={'h2'}>SNAP PLATE NUMBER</Heading>
-        //   <CardBody>
-        //     <CamComponent
-        //       webcamRef={webcamRef}
-        //       videoConstraints={videoConstraints}
-        //     />
-        //   </CardBody>
-        //   <CardFooter>
-        //     <Button onClick={capture}>Snap Picture</Button>
-        //   </CardFooter>
-        // </Card>
-        <Card
-          mx={'auto'}
-          maxW={'xl'}
-          variant={'elevated'}
-          align={'center'}
-          sx={{ transition: 0.4 }}
-          p={5}
-        >
-          <Heading as={'h2'}>IMAGE PREVIEW</Heading>
-          <CardBody>
+        <Box>
+          <CardComponent title={'PREVIEW PLATE NUMBER'} props={btnArray}>
             <img src={picture} alt="plate number img" />
-          </CardBody>
-          <CardFooter>
-            <ButtonGroup>
-              <Button
-                onClick={() => {
-                  setPicture('');
-                }}
-              >
-                Retake Picture
-              </Button>
-              <Button>Generate Ticket</Button>
-            </ButtonGroup>
-          </CardFooter>
-        </Card>
+          </CardComponent>
+        </Box>
       )}
     </Box>
   );
