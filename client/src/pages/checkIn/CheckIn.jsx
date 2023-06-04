@@ -3,6 +3,7 @@ import { Box, Button, ButtonGroup, Text } from '@chakra-ui/react';
 import CamComponent from '../../components/CamComponent';
 import CardComponent from '../../components/CardComponent';
 import { createWorker } from 'tesseract.js';
+import { randomPlateNos } from '../../common/Constants';
 
 const videoConstraints = {
   width: 400,
@@ -24,7 +25,6 @@ const CheckIn = () => {
 
   const validatePlateNumber = testSubject => {
     const regex = /^[A-Z]{3}-[0-9]{3}[A-Z]{2}$/;
-    // const regex = /^([A-Z]{3})([0-9]{3})([A-Z]{2}|-)$/;
     return regex.test(testSubject);
   };
   const capture = useCallback(() => {
@@ -71,7 +71,12 @@ const CheckIn = () => {
 
   // Use A Dummy Plate Number
   const dummyPlateNo = () => {
-    const plateNumber = 'YLA-291AP';
+    const plateNumber =
+      randomPlateNos[Math.floor(Math.random() * randomPlateNos.length)];
+    console.log(
+      '🚀 ~ file: CheckIn.jsx:75 ~ dummyPlateNo ~ Random plateNumber:',
+      plateNumber
+    );
     setIsPlateNumberValid(validatePlateNumber(plateNumber));
     setPlateNumber(plateNumber);
   };
