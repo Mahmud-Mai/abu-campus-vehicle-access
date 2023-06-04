@@ -16,9 +16,17 @@ const CheckIn = () => {
   const [plateNumberImage, setPlateNumberImage] = useState('');
   const [plateNumber, setPlateNumber] = useState('');
   const [isDummy, setIsDummy] = useState(false);
-  const [isPNValid, setIsPNValid] = useState(false); // for plate number validation
+  const [isPlateNumberValid, setIsPlateNumberValid] = useState(false); // for plate number validation
   const webcamRef = useRef(null);
 
+  // const regex =
+  //   /^([A-Z]{3})(-)([0-9]{3})([A-Z]{2})$|^([0-9]{3})(-)([A-Z]{2})(-)([A-Z]{3})$/;
+
+  const validatePlateNumber = testSubject => {
+    const regex = /^[A-Z]{3}-[0-9]{3}[A-Z]{2}$/;
+    // const regex = /^([A-Z]{3})([0-9]{3})([A-Z]{2}|-)$/;
+    return regex.test(testSubject);
+  };
   const capture = useCallback(() => {
     const pictureSrc = webcamRef.current.getScreenshot();
     setPlateNumberImage(pictureSrc);
@@ -50,39 +58,34 @@ const CheckIn = () => {
         data: { text },
       } = await worker.recognize(plateNumberImage);
       setPlateNumber(text);
+      console.log('🚀 ~ file: CheckIn.jsx:54 ~ doOCR ~ text:', text);
     }
   }, [plateNumberImage]);
 
-  const dummyPlateOcr = () => {
-    const dummyUrl = process.env.local.DUMMY_URL;
-    doOCR(dummyUrl);
+  const dummyPlateImage = () => {
+    const dummyUrl =
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Nigerian_number_plate_Lagos_2014.jpg/800px-Nigerian_number_plate_Lagos_2014.jpg?20180519114758';
+
+    if (dummyUrl !== undefined) doOCR(dummyUrl);
   };
 
-  const dummyPlateTicket = () => {
-    setPlateNumber('YLA-291AP');
+  // Use A Dummy Plate Number
+  const dummyPlateNo = () => {
+    const plateNumber = 'YLA-291AP';
+    setIsPlateNumberValid(validatePlateNumber(plateNumber));
+    setPlateNumber(plateNumber);
   };
 
+  // Recognize characters from image
   useEffect(() => {
-    doOCR();
+    doOCR(plateNumberImage);
   }, [doOCR, plateNumberImage]);
 
-  const validatePlateNumber = plateNumber => {
-    const regex = /^([A-Z]{3})(\d{1,2})([A-Z]{1,3})(\d{1,4})$/;
-    return regex.test(plateNumber);
-  };
+  // Check if Input Matches a Plate Number Format
+  useEffect(() => {
+    setIsPlateNumberValid(validatePlateNumber(plateNumber));
+  }, [isPlateNumberValid, plateNumber]);
 
-  const handleChange = event => {
-    const plateNumber = event.target.value;
-    isPNValid(validatePlateNumber(plateNumber));
-
-    if (isPNValid) {
-      console.log('The plate number matches a Nigerian plate number format.');
-    } else {
-      console.log(
-        'The plate number does not match a Nigerian plate number format.'
-      );
-    }
-  };
   return (
     <Box>
       {plateNumberImage === '' ? (
@@ -106,8 +109,10 @@ const CheckIn = () => {
             <Box>
               <img src={plateNumberImage} alt="plate number img" />
             </Box>
-            <Text m={3} onChange={handleChange}>
-              Recognized Text: {plateNumber}
+            <Text m={3}>
+              {isPlateNumberValid
+                ? `Recognized Plate Number: ${plateNumber}`
+                : `Valid Nigerian Plate Number not detected`}
             </Text>
             {!isDummy ? (
               <ButtonGroup>
@@ -115,10 +120,8 @@ const CheckIn = () => {
               </ButtonGroup>
             ) : (
               <ButtonGroup>
-                <Button onClick={dummyPlateOcr}>Dummy Plate for OCR</Button>
-                <Button onClick={dummyPlateTicket}>
-                  Dummy Plate for ticket
-                </Button>
+                <Button onClick={dummyPlateImage}>Use Dummy PN Image</Button>
+                <Button onClick={dummyPlateNo}>Use Dummy Plate Number</Button>
               </ButtonGroup>
             )}
           </CardComponent>
