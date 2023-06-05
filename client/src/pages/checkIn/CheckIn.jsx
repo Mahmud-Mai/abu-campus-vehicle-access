@@ -37,6 +37,15 @@ const CheckIn = () => {
     setIsDummy(false);
   };
 
+  const generateTicket = () => {
+    console.log(
+      `Ticket Generated: 
+      Plate Number ${plateNumber} 
+      Time: ${new Date().toLocaleTimeString()} 
+      Date: ${new Date().toLocaleDateString()} `
+    );
+  };
+
   const btnArray = [
     {
       key: 0,
@@ -46,6 +55,7 @@ const CheckIn = () => {
     {
       key: 1,
       btnText: 'Generate Ticket',
+      btnAction: generateTicket,
     },
   ];
 
