@@ -18,6 +18,7 @@ function App() {
           <ColorModeSwitcher justifySelf="flex-end" />
           <Routes>
             <Route path="/" element={<Layout />}>
+              <Route index element={<CheckIn />} />
               <Route errorElement={<RouterError />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/check-in" element={<CheckIn />} />
