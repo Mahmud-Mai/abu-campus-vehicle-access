@@ -12,8 +12,17 @@ import {
 
 const CardComponent = props => {
   return (
-    <Card mx={'auto'} maxW="xl" variant={'elevated'} align={'center'} p={5}>
-      <Heading as={'h2'}>{props.title}</Heading>
+    <Card
+      mx={'auto'}
+      maxW="xl"
+      variant={'elevated'}
+      align={'center'}
+      p={5}
+      sx={props.customStyles}
+    >
+      <Heading as={'h2'} p={5}>
+        {props.title}
+      </Heading>
       <CardBody>{props.children}</CardBody>
       <CardFooter>
         <ButtonGroup>

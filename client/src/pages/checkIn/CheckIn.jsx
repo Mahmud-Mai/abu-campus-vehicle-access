@@ -1,27 +1,35 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Box, Button, ButtonGroup, Text } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  ButtonGroup,
+  Flex,
+  Stack,
+  StackDivider,
+  Text,
+} from '@chakra-ui/react';
 import CamComponent from '../../components/CamComponent';
 import CardComponent from '../../components/CardComponent';
 import { createWorker } from 'tesseract.js';
 import { randomPlateNos } from '../../common/Constants';
-
-const videoConstraints = {
-  width: 400,
-  height: 400,
-  facingMode: 'environment',
-};
-
+import { videoConstraints } from '../../common/Constants';
+import { useSelector } from 'react-redux';
 const worker = await createWorker();
 
 const CheckIn = () => {
+  // const ticket = useSelector(state => state.ticket);
+  const vehicle = useSelector(state => state.vehicle);
+  console.log('🚀 ~ file: CheckIn.jsx:13 ~ CheckIn ~ vehicle:', vehicle);
+
   const [plateNumberImage, setPlateNumberImage] = useState('');
   const [plateNumber, setPlateNumber] = useState('');
   const [isDummy, setIsDummy] = useState(false);
+  const [isTicketGenerated, setIsTicketGenerated] = useState(false);
   const [isPlateNumberValid, setIsPlateNumberValid] = useState(false); // for plate number validation
   const webcamRef = useRef(null);
 
-  // const regex =
-  //   /^([A-Z]{3})(-)([0-9]{3})([A-Z]{2})$|^([0-9]{3})(-)([A-Z]{2})(-)([A-Z]{3})$/;
+  // A universal Regex to match both forward facing and reversed plate numbers
+  // const regex = /^([A-Z]{3})(-)([0-9]{3})([A-Z]{2})$|^([0-9]{3})(-)([A-Z]{2})(-)([A-Z]{3})$/;
 
   const validatePlateNumber = testSubject => {
     const regex = /^[A-Z]{3}-[0-9]{3}[A-Z]{2}$/;
@@ -38,6 +46,7 @@ const CheckIn = () => {
   };
 
   const generateTicket = () => {
+    setIsTicketGenerated(true);
     console.log(
       `Ticket Generated: 
       Plate Number ${plateNumber} 
@@ -72,12 +81,12 @@ const CheckIn = () => {
     }
   }, [plateNumberImage]);
 
-  const dummyPlateImage = () => {
-    const dummyUrl =
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Nigerian_number_plate_Lagos_2014.jpg/800px-Nigerian_number_plate_Lagos_2014.jpg?20180519114758';
+  // const dummyPlateImage = () => {
+  //   const dummyUrl =
+  //     'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Nigerian_number_plate_Lagos_2014.jpg/800px-Nigerian_number_plate_Lagos_2014.jpg?20180519114758';
 
-    if (dummyUrl !== undefined) doOCR(dummyUrl);
-  };
+  //   if (dummyUrl !== undefined) doOCR(dummyUrl);
+  // };
 
   // Use A Dummy Plate Number
   const dummyPlateNo = () => {
@@ -103,43 +112,79 @@ const CheckIn = () => {
 
   return (
     <Box>
-      {plateNumberImage === '' ? (
-        // If plateNumberImage is empty: Show Video-Camera Component
+      {isTicketGenerated ? (
         <Box>
           <CardComponent
-            title={'SNAP PLATE NUMBER'}
-            btnAction={capture}
-            btnText={'Capture'}
+            customStyles={{ backgroundColor: 'white', color: 'black' }}
+            title={'ABU VEHICLE GATE PASS'}
+            btnAction={() => console.log('Generated Ticket Successfully')}
+            btnText={'Print Ticket'}
           >
-            <CamComponent
-              webcamRef={webcamRef}
-              videoConstraints={videoConstraints}
-            />
+            <Stack divider={<StackDivider />} width={'24rem'} spacing="5">
+              <Flex justify={'space-between'}>
+                <Box>Vehicle Plate Number:</Box>
+                <Text> {plateNumber}</Text>
+              </Flex>
+              <Flex justify={'space-between'}>
+                <Box>Gate Used:</Box>
+                <Text>North Gate</Text>
+              </Flex>
+              <Flex justify={'space-between'}>
+                <Box>Date & Time:</Box>
+                <Text>16:43:30 | 06/06/2023</Text>
+              </Flex>
+              <Flex justify={'space-between'}>
+                <Box>Personnel on Duty:</Box>
+                <Text> Sambo Hamisu</Text>
+              </Flex>
+            </Stack>
           </CardComponent>
         </Box>
       ) : (
-        // If plateNumberImage is not empty: Show Preview Component
         <Box>
-          <CardComponent title={'PREVIEW PLATE NUMBER'} props={btnArray}>
+          {plateNumberImage === '' ? (
+            // If plateNumberImage is empty: Show Video-Camera Component
             <Box>
-              <img src={plateNumberImage} alt="plate number img" />
+              <CardComponent
+                title={'SNAP PLATE NUMBER'}
+                btnAction={capture}
+                btnText={'Capture'}
+              >
+                <CamComponent
+                  webcamRef={webcamRef}
+                  videoConstraints={videoConstraints}
+                />
+              </CardComponent>
             </Box>
-            <Text m={3}>
-              {isPlateNumberValid
-                ? `Recognized Plate Number: ${plateNumber}`
-                : `Valid Nigerian Plate Number not detected`}
-            </Text>
-            {!isDummy ? (
-              <ButtonGroup>
-                <Button onClick={() => setIsDummy(true)}>Use Dummy Data</Button>
-              </ButtonGroup>
-            ) : (
-              <ButtonGroup>
-                <Button onClick={dummyPlateImage}>Use Dummy PN Image</Button>
-                <Button onClick={dummyPlateNo}>Use Dummy Plate Number</Button>
-              </ButtonGroup>
-            )}
-          </CardComponent>
+          ) : (
+            // If plateNumberImage is not empty: Show Preview Component
+            <Box>
+              <CardComponent title={'PREVIEW PLATE NUMBER'} props={btnArray}>
+                <Box>
+                  <img src={plateNumberImage} alt="plate number img" />
+                </Box>
+                <Text m={3}>
+                  {isPlateNumberValid
+                    ? `Recognized Plate Number: ${plateNumber}`
+                    : `Valid Nigerian Plate Number not detected`}
+                </Text>
+                {!isDummy ? (
+                  <ButtonGroup>
+                    <Button onClick={() => setIsDummy(true)}>
+                      Use Dummy Data
+                    </Button>
+                  </ButtonGroup>
+                ) : (
+                  <ButtonGroup>
+                    {/* <Button onClick={dummyPlateImage}>Use Dummy PN Image</Button> */}
+                    <Button onClick={dummyPlateNo}>
+                      Use Dummy Plate Number
+                    </Button>
+                  </ButtonGroup>
+                )}
+              </CardComponent>
+            </Box>
+          )}
         </Box>
       )}
     </Box>
