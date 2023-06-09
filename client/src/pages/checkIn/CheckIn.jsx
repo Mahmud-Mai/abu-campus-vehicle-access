@@ -22,6 +22,7 @@ import {
 import { selectAllGates } from '../../features/gate/gateSlice';
 import { selectAllUsers } from '../../features/users/userSlice';
 import { nanoid } from '@reduxjs/toolkit';
+import QRCodeComponent from '../../components/QrcodeComponent';
 
 const worker = await createWorker(); // needed by tesseract
 
@@ -158,6 +159,12 @@ const CheckIn = () => {
               <Flex justify={'space-between'}>
                 <Box>Personnel on Duty:</Box>
                 <Text>{user.userName}</Text>
+              </Flex>
+              <Flex
+                justify={'center'}
+                // mt={3}
+              >
+                <QRCodeComponent ticketId={ticketId} />
               </Flex>
             </Stack>
           </CardComponent>
