@@ -15,21 +15,35 @@ import { createWorker } from 'tesseract.js';
 import { randomPlateNos } from '../../common/Constants'; // personally curated list of dummy plate Nos
 import { videoConstraints } from '../../common/Constants'; // for webcam config
 import { useDispatch, useSelector } from 'react-redux';
-import { ticketAdded } from '../../features/ticket/ticketSlice';
+import {
+  ticketAdded,
+  selectAllTickets,
+} from '../../features/ticket/ticketsSlice';
 import { selectAllGates } from '../../features/gate/gateSlice';
+import { selectAllUsers } from '../../features/users/userSlice';
+import { nanoid } from '@reduxjs/toolkit';
 
 const worker = await createWorker(); // needed by tesseract
 
 const CheckIn = () => {
-  const dispatch = useDispatch();
   const gates = useSelector(selectAllGates);
-  const [gateId, setGateId] = useState();
+  const allUser = useSelector(selectAllUsers);
+  const userId = allUser[0].userId;
+  const [gateId, setGateId] = useState(gates.length > 0 ? gates[0].gateId : '');
+  const [ticketId, setTicketId] = useState('');
+  const dispatch = useDispatch();
 
   const [plateNumberImage, setPlateNumberImage] = useState(''); // to be used to call doOCR()
   const [plateNumber, setPlateNumber] = useState(''); // to be used in validatePlateNo() and displayed to UI
   const [isTicketGenerated, setIsTicketGenerated] = useState(false); // will be used to render Ticket component
   const [isPlateNumberValid, setIsPlateNumberValid] = useState(false); // To display plate number to UI
   const webcamRef = useRef(null);
+
+  // Fetch the missing data to populate ticket
+  const allTickets = useSelector(selectAllTickets);
+  const ticket = allTickets.find(ticket => ticket.ticketId === ticketId);
+  const user = allUser.find(user => user.userId === userId);
+  const gate = gates.find(gate => gate.gateId === Number(gateId));
 
   // Take picture
   const capture = useCallback(() => {
@@ -60,7 +74,6 @@ const CheckIn = () => {
   const useDummyPlateNo = () => {
     const plateNumber =
       randomPlateNos[Math.floor(Math.random() * randomPlateNos.length)];
-    console.log('🚀  Random Dummy Plate No:', plateNumber);
     setIsPlateNumberValid(validatePlateNumber(plateNumber));
     setPlateNumber(plateNumber);
   };
@@ -81,9 +94,17 @@ const CheckIn = () => {
   };
 
   const onGenerateTicketClicked = () => {
-    setIsTicketGenerated(true);
+    // Check if plateNumber is defined
     if (plateNumber) {
-      dispatch(ticketAdded(plateNumber, gateId));
+      // Generate a unique ticketId
+      const ticketId = nanoid();
+
+      // Set the value of the ticketId state variable
+      setTicketId(ticketId);
+      setIsTicketGenerated(true);
+
+      // Dispatch the ticketAdded action creator
+      dispatch(ticketAdded(ticketId, plateNumber, userId, gateId));
     }
     setPlateNumberImage('');
     // setIsTicketGenerated(false)
@@ -122,19 +143,21 @@ const CheckIn = () => {
             <Stack divider={<StackDivider />} width={'24rem'} spacing="5">
               <Flex justify={'space-between'}>
                 <Box>Vehicle Plate Number:</Box>
-                <Text> {plateNumber}</Text>
+                <Text> {ticket.plateNumber}</Text>
               </Flex>
               <Flex justify={'space-between'}>
                 <Box>Gate Used:</Box>
-                <Text>North Gate</Text>
+                <Text>{gate.gateName}</Text>
               </Flex>
               <Flex justify={'space-between'}>
                 <Box>Date & Time:</Box>
-                <Text>16:43:30 | 06/06/2023</Text>
+                <Text>
+                  {ticket.time} | {ticket.date}
+                </Text>
               </Flex>
               <Flex justify={'space-between'}>
                 <Box>Personnel on Duty:</Box>
-                <Text> Sambo Hamisu</Text>
+                <Text>{user.userName}</Text>
               </Flex>
             </Stack>
           </CardComponent>
