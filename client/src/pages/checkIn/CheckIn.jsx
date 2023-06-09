@@ -19,10 +19,11 @@ import { ticketAdded } from '../../features/ticket/ticketSlice';
 const worker = await createWorker(); // needed by tesseract
 
 const CheckIn = () => {
+  const userId = 'SECURITY-001';
+
   const dispatch = useDispatch();
   const [plateNumberImage, setPlateNumberImage] = useState(''); // to be used to call doOCR()
   const [plateNumber, setPlateNumber] = useState(''); // to be used in validatePlateNo() and displayed to UI
-  const [isDummy, setIsDummy] = useState(false); // for demonstration
   const [isTicketGenerated, setIsTicketGenerated] = useState(false); // will be used to render Ticket component
   const [isPlateNumberValid, setIsPlateNumberValid] = useState(false); // To display plate number to UI
   const webcamRef = useRef(null);
@@ -36,7 +37,6 @@ const CheckIn = () => {
   // ReTake picture
   const reCapture = () => {
     setPlateNumberImage('');
-    setIsDummy(false);
   };
 
   const validatePlateNumber = testSubject => {
@@ -47,7 +47,7 @@ const CheckIn = () => {
   const onGenerateTicketClicked = () => {
     setIsTicketGenerated(true);
     if (plateNumber) {
-      dispatch(ticketAdded(plateNumber));
+      dispatch(ticketAdded(plateNumber, userId));
     }
     setPlateNumberImage('');
     // setIsTicketGenerated(false)
@@ -82,13 +82,10 @@ const CheckIn = () => {
   }, [plateNumberImage]);
 
   // Choose a random Dummy Plate Number from a curated list
-  const dummyPlateNo = () => {
+  const useDummyPlateNo = () => {
     const plateNumber =
       randomPlateNos[Math.floor(Math.random() * randomPlateNos.length)];
-    console.log(
-      '🚀 ~ file: CheckIn.jsx:75 ~ dummyPlateNo ~ Random plateNumber:',
-      plateNumber
-    );
+    console.log('🚀  Random Dummy Plate No:', plateNumber);
     setIsPlateNumberValid(validatePlateNumber(plateNumber));
     setPlateNumber(plateNumber);
   };
@@ -161,20 +158,12 @@ const CheckIn = () => {
                     ? `Recognized Plate Number: ${plateNumber}`
                     : `Valid Nigerian Plate Number not detected`}
                 </Text>
-                {!isDummy ? (
-                  <ButtonGroup>
-                    <Button onClick={() => setIsDummy(true)}>
-                      Use Dummy Data
-                    </Button>
-                  </ButtonGroup>
-                ) : (
-                  <ButtonGroup>
-                    {/* <Button onClick={dummyPlateImage}>Use Dummy PN Image</Button> */}
-                    <Button onClick={dummyPlateNo}>
-                      Use Dummy Plate Number
-                    </Button>
-                  </ButtonGroup>
-                )}
+
+                <ButtonGroup>
+                  <Button onClick={useDummyPlateNo}>
+                    Use Dummy Plate Number
+                  </Button>
+                </ButtonGroup>
               </CardComponent>
             </Box>
           )}
