@@ -4,6 +4,7 @@ import {
   Button,
   ButtonGroup,
   Flex,
+  Select,
   Stack,
   StackDivider,
   Text,
@@ -13,15 +14,17 @@ import CardComponent from '../../components/CardComponent';
 import { createWorker } from 'tesseract.js';
 import { randomPlateNos } from '../../common/Constants'; // personally curated list of dummy plate Nos
 import { videoConstraints } from '../../common/Constants'; // for webcam config
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { ticketAdded } from '../../features/ticket/ticketSlice';
+import { selectAllGates } from '../../features/gate/gateSlice';
 
 const worker = await createWorker(); // needed by tesseract
 
 const CheckIn = () => {
-  const userId = 'SECURITY-001';
-
   const dispatch = useDispatch();
+  const gates = useSelector(selectAllGates);
+  const [gateId, setGateId] = useState();
+
   const [plateNumberImage, setPlateNumberImage] = useState(''); // to be used to call doOCR()
   const [plateNumber, setPlateNumber] = useState(''); // to be used in validatePlateNo() and displayed to UI
   const [isTicketGenerated, setIsTicketGenerated] = useState(false); // will be used to render Ticket component
@@ -38,34 +41,6 @@ const CheckIn = () => {
   const reCapture = () => {
     setPlateNumberImage('');
   };
-
-  const validatePlateNumber = testSubject => {
-    const regex = /^[A-Z]{3}-[0-9]{3}[A-Z]{2}$/;
-    return regex.test(testSubject);
-  };
-
-  const onGenerateTicketClicked = () => {
-    setIsTicketGenerated(true);
-    if (plateNumber) {
-      dispatch(ticketAdded(plateNumber, userId));
-    }
-    setPlateNumberImage('');
-    // setIsTicketGenerated(false)
-  };
-
-  // This step is to ensure CardComponent becomes reusable
-  const btnArray = [
-    {
-      key: 0,
-      btnText: 'Recapture',
-      btnAction: reCapture,
-    },
-    {
-      key: 1,
-      btnText: 'Generate Ticket',
-      btnAction: onGenerateTicketClicked,
-    },
-  ];
 
   // Define function to run character recognition on an image
   const doOCR = useCallback(async () => {
@@ -99,6 +74,40 @@ const CheckIn = () => {
   useEffect(() => {
     setIsPlateNumberValid(validatePlateNumber(plateNumber));
   }, [isPlateNumberValid, plateNumber]);
+
+  const validatePlateNumber = testSubject => {
+    const regex = /^[A-Z]{3}-[0-9]{3}[A-Z]{2}$/;
+    return regex.test(testSubject);
+  };
+
+  const onGenerateTicketClicked = () => {
+    setIsTicketGenerated(true);
+    if (plateNumber) {
+      dispatch(ticketAdded(plateNumber, gateId));
+    }
+    setPlateNumberImage('');
+    // setIsTicketGenerated(false)
+  };
+
+  // This step is to ensure CardComponent becomes reusable
+  const btnArray = [
+    {
+      key: 0,
+      btnText: 'Recapture',
+      btnAction: reCapture,
+    },
+    {
+      key: 1,
+      btnText: 'Generate Ticket',
+      btnAction: onGenerateTicketClicked,
+    },
+  ];
+
+  const gateOptions = gates.map(gate => (
+    <option key={gate.gateId} value={gate.gateId}>
+      {gate.gateName}
+    </option>
+  ));
 
   return (
     <Box>
@@ -159,7 +168,19 @@ const CheckIn = () => {
                     : `Valid Nigerian Plate Number not detected`}
                 </Text>
 
-                <ButtonGroup>
+                <Box>
+                  <label htmlFor="selectGate"></label>
+                  <Select
+                    id="selectGate"
+                    value={gateId}
+                    placeholder="Select gate"
+                    onChange={e => setGateId(e.target.value)}
+                  >
+                    {gateOptions}
+                  </Select>
+                </Box>
+
+                <ButtonGroup mt={5}>
                   <Button onClick={useDummyPlateNo}>
                     Use Dummy Plate Number
                   </Button>

@@ -4,18 +4,19 @@ import { createSlice, nanoid } from '@reduxjs/toolkit';
 const initialState = [];
 
 export const ticketSlice = createSlice({
-  name: 'ticketSlice',
+  name: 'ticket',
   initialState,
   reducers: {
     ticketAdded: {
       reducer(state, action) {
         state.push(action.payload);
       },
-      prepare(plateNumber) {
+      prepare(plateNumber, gateId) {
         return {
           payload: {
             id: nanoid(),
             plateNumber: plateNumber,
+            gateId,
             Date: new Date().toLocaleDateString(),
             Time: new Date().toLocaleTimeString(),
           },
