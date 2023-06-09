@@ -8,53 +8,52 @@ import {
   StackDivider,
   Text,
 } from '@chakra-ui/react';
-import CamComponent from '../../components/CamComponent';
+import CamComponent from '../../components/CamComponent'; // component to provide camera to UI
 import CardComponent from '../../components/CardComponent';
 import { createWorker } from 'tesseract.js';
-import { randomPlateNos } from '../../common/Constants';
-import { videoConstraints } from '../../common/Constants';
-import { useSelector } from 'react-redux';
-const worker = await createWorker();
+import { randomPlateNos } from '../../common/Constants'; // personally curated list of dummy plate Nos
+import { videoConstraints } from '../../common/Constants'; // for webcam config
+import { useDispatch } from 'react-redux';
+import { ticketAdded } from '../../features/ticket/ticketSlice';
+
+const worker = await createWorker(); // needed by tesseract
 
 const CheckIn = () => {
-  // const ticket = useSelector(state => state.ticket);
-  const vehicle = useSelector(state => state.vehicle);
-  console.log('🚀 ~ file: CheckIn.jsx:13 ~ CheckIn ~ vehicle:', vehicle);
-
-  const [plateNumberImage, setPlateNumberImage] = useState('');
-  const [plateNumber, setPlateNumber] = useState('');
-  const [isDummy, setIsDummy] = useState(false);
-  const [isTicketGenerated, setIsTicketGenerated] = useState(false);
-  const [isPlateNumberValid, setIsPlateNumberValid] = useState(false); // for plate number validation
+  const dispatch = useDispatch();
+  const [plateNumberImage, setPlateNumberImage] = useState(''); // to be used to call doOCR()
+  const [plateNumber, setPlateNumber] = useState(''); // to be used in validatePlateNo() and displayed to UI
+  const [isDummy, setIsDummy] = useState(false); // for demonstration
+  const [isTicketGenerated, setIsTicketGenerated] = useState(false); // will be used to render Ticket component
+  const [isPlateNumberValid, setIsPlateNumberValid] = useState(false); // To display plate number to UI
   const webcamRef = useRef(null);
 
-  // A universal Regex to match both forward facing and reversed plate numbers
-  // const regex = /^([A-Z]{3})(-)([0-9]{3})([A-Z]{2})$|^([0-9]{3})(-)([A-Z]{2})(-)([A-Z]{3})$/;
-
-  const validatePlateNumber = testSubject => {
-    const regex = /^[A-Z]{3}-[0-9]{3}[A-Z]{2}$/;
-    return regex.test(testSubject);
-  };
+  // Take picture
   const capture = useCallback(() => {
     const pictureSrc = webcamRef.current.getScreenshot();
     setPlateNumberImage(pictureSrc);
   }, [webcamRef]);
 
+  // ReTake picture
   const reCapture = () => {
     setPlateNumberImage('');
     setIsDummy(false);
   };
 
-  const generateTicket = () => {
-    setIsTicketGenerated(true);
-    console.log(
-      `Ticket Generated: 
-      Plate Number ${plateNumber} 
-      Time: ${new Date().toLocaleTimeString()} 
-      Date: ${new Date().toLocaleDateString()} `
-    );
+  const validatePlateNumber = testSubject => {
+    const regex = /^[A-Z]{3}-[0-9]{3}[A-Z]{2}$/;
+    return regex.test(testSubject);
   };
 
+  const onGenerateTicketClicked = () => {
+    setIsTicketGenerated(true);
+    if (plateNumber) {
+      dispatch(ticketAdded(plateNumber));
+    }
+    setPlateNumberImage('');
+    // setIsTicketGenerated(false)
+  };
+
+  // This step is to ensure CardComponent becomes reusable
   const btnArray = [
     {
       key: 0,
@@ -64,10 +63,11 @@ const CheckIn = () => {
     {
       key: 1,
       btnText: 'Generate Ticket',
-      btnAction: generateTicket,
+      btnAction: onGenerateTicketClicked,
     },
   ];
 
+  // Define function to run character recognition on an image
   const doOCR = useCallback(async () => {
     if (plateNumberImage) {
       await worker.load();
@@ -81,14 +81,7 @@ const CheckIn = () => {
     }
   }, [plateNumberImage]);
 
-  // const dummyPlateImage = () => {
-  //   const dummyUrl =
-  //     'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Nigerian_number_plate_Lagos_2014.jpg/800px-Nigerian_number_plate_Lagos_2014.jpg?20180519114758';
-
-  //   if (dummyUrl !== undefined) doOCR(dummyUrl);
-  // };
-
-  // Use A Dummy Plate Number
+  // Choose a random Dummy Plate Number from a curated list
   const dummyPlateNo = () => {
     const plateNumber =
       randomPlateNos[Math.floor(Math.random() * randomPlateNos.length)];
@@ -100,7 +93,7 @@ const CheckIn = () => {
     setPlateNumber(plateNumber);
   };
 
-  // Recognize characters from image
+  // Run doOCR either on image capture or when a dummy plateNumberImage is provided
   useEffect(() => {
     doOCR(plateNumberImage);
   }, [doOCR, plateNumberImage]);

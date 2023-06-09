@@ -1,0 +1,47 @@
+export const ticketRows = [
+  {
+    ticketId: '0001',
+    plateNo: 'YLA-291AP',
+    entryTime: '07:11',
+    entryDate: '05/06/2023',
+    exitTime: '10:15',
+    exitDate: '05/06/2023',
+    entryGate: 'North Gate',
+    exitGate: 'Main Gate',
+    personelIncharge: 'Sambo Hamis',
+  },
+  {
+    ticketId: '0002',
+    plateNo: 'ABC-251BP',
+    entryTime: '16:01',
+    entryDate: '18/06/2023',
+    exitTime: '09:55',
+    exitDate: '20/06/2023',
+    entryGate: 'North Gate',
+    exitGate: 'Main Gate',
+    personelIncharge: 'Idris Zakari',
+  },
+  {
+    ticketId: '0003',
+    plateNo: 'GMB-946GG',
+    entryTime: '12:57',
+    entryDate: '07/06/2023',
+    exitTime: '14:09',
+    exitDate: '07/06/2023',
+    entryGate: 'North Gate',
+    exitGate: 'Main Gate',
+    personelIncharge: 'Adamu Musa',
+  },
+];
+
+export const ticketCols = [
+  { field: 'ticketId' },
+  { field: 'plateNo' },
+  { field: 'entryTime' },
+  { field: 'entryDate' },
+  { field: 'exitTime' },
+  { field: 'exitDate' },
+  { field: 'entryGate' },
+  { field: 'exitGate' },
+  { field: 'personelIncharge' },
+];
