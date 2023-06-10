@@ -4,6 +4,7 @@ import { selectAllTickets } from '../../features/ticket/ticketsSlice';
 import PageHeading from '../../components/PageHeading';
 import { selectAllUsers } from '../../features/users/userSlice';
 import { selectAllGates } from '../../features/gate/gateSlice';
+import { Flex } from '@chakra-ui/react';
 
 const Tickets = () => {
   const allAppOperators = useSelector(selectAllUsers);
@@ -40,7 +41,9 @@ const Tickets = () => {
         title={'Tickets Information'}
         subTitle={'View all tickets information'}
       />
-      <DataTable rowData={rowData} columnDefs={columnDefs} />
+      <Flex mx={'auto'} justify={'center'}>
+        <DataTable rowData={rowData} columnDefs={columnDefs} />
+      </Flex>
     </div>
   );
 };

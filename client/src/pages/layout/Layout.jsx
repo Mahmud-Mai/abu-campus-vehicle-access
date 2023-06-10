@@ -7,7 +7,7 @@ const Layout = () => {
   return (
     <Box>
       <Sidebar />
-      <Outlet />
+      <Outlet max-height="100vh" />
     </Box>
   );
 };

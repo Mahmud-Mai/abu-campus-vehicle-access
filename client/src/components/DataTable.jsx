@@ -13,7 +13,7 @@ const DataTable = ({ rowData, columnDefs }) => {
       <Box
         mx={'auto'}
         className="ag-theme-alpine"
-        sx={{ width: '5xl', height: 700, textAlign: 'left' }}
+        sx={{ width: '6xl', height: 700, textAlign: 'left' }}
       >
         <AgGridReact
           rowData={rowData}

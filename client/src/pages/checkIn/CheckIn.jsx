@@ -23,6 +23,7 @@ import { selectAllGates } from '../../features/gate/gateSlice';
 import { selectAllUsers } from '../../features/users/userSlice';
 import { nanoid } from '@reduxjs/toolkit';
 import QrcodeComponent from '../../components/QrcodeComponent';
+import PageHeading from '../../components/PageHeading';
 
 const worker = await createWorker(); // needed by tesseract
 
@@ -125,103 +126,110 @@ const CheckIn = () => {
     },
   ];
 
-  const availableGates = gates.map(gate => (
-    <option key={gate.gateId} value={gate.gateId}>
-      {gate.gateName}
+  const availableGates = gates.map(({ gateId, gateName }) => (
+    <option key={gateId} value={gateId}>
+      {gateName}
     </option>
   ));
 
   return (
-    <Box>
-      {isTicketGenerated ? (
-        <Box>
-          <CardComponent
-            customStyles={{ backgroundColor: 'white', color: 'black' }}
-            colorScheme="teal"
-            title={'ABU VEHICLE GATE PASS'}
-            // btnAction={btnArray[2]}
-            // btnText={'Print Ticket'}
-          >
-            <Stack divider={<StackDivider />} width={'24rem'} spacing="5">
-              <Flex justify={'space-between'}>
-                <Box>Vehicle Plate Number:</Box>
-                <Text> {ticket.plateNumber}</Text>
-              </Flex>
-              <Flex justify={'space-between'}>
-                <Box>Gate Used:</Box>
-                <Text>{gate.gateName}</Text>
-              </Flex>
-              <Flex justify={'space-between'}>
-                <Box>Date & Time:</Box>
-                <Text>
-                  {ticket.time} | {ticket.date}
-                </Text>
-              </Flex>
-              <Flex justify={'space-between'}>
-                <Box>Personnel on Duty:</Box>
-                <Text>{user.userName}</Text>
-              </Flex>
-              <Flex justify={'center'}>
-                <QrcodeComponent ticketId={ticketId} />
-              </Flex>
-            </Stack>
-            <Button onClick={e => window.print()} colorScheme="teal" mt={4}>
-              Print Ticket
-            </Button>
-          </CardComponent>
-        </Box>
-      ) : (
-        <Box>
-          {plateNumberImage === '' ? (
-            // If plateNumberImage is empty: Show Video-Camera Component
-            <Box>
-              <CardComponent
-                title={'SNAP PLATE NUMBER'}
-                btnAction={capture}
-                btnText={'Capture'}
-              >
-                <CamComponent
-                  webcamRef={webcamRef}
-                  videoConstraints={videoConstraints}
-                />
-              </CardComponent>
-            </Box>
-          ) : (
-            // If plateNumberImage is not empty: Show Preview Component
-            <Box>
-              <CardComponent title={'PREVIEW PLATE NUMBER'} props={btnArray}>
-                <Box>
-                  <img src={plateNumberImage} alt="plate number img" />
-                </Box>
-                <Text m={3}>
-                  {isPlateNumberValid
-                    ? `Recognized Plate Number: ${plateNumber}`
-                    : `Valid Nigerian Plate Number not detected`}
-                </Text>
+    <>
+      <PageHeading
+        title={'Vehicle Check-In'}
+        subTitle={'Scan Vehicle Plate Numbers and Print their Gate Pass'}
+      />
 
-                <Box>
-                  <label htmlFor="selectGate"></label>
-                  <Select
-                    id="selectGate"
-                    value={gateId}
-                    placeholder="Select gate"
-                    onChange={e => setGateId(e.target.value)}
-                  >
-                    {availableGates}
-                  </Select>
-                </Box>
+      <Box height={'85vh'}>
+        {isTicketGenerated ? (
+          <Box>
+            <CardComponent
+              customStyles={{ backgroundColor: 'white', color: 'black' }}
+              colorScheme="teal"
+              title={'ABU VEHICLE GATE PASS'}
+              // btnAction={btnArray[2]}
+              // btnText={'Print Ticket'}
+            >
+              <Stack divider={<StackDivider />} width={'24rem'} spacing="5">
+                <Flex justify={'space-between'}>
+                  <Box>Vehicle Plate Number:</Box>
+                  <Text> {ticket.plateNumber}</Text>
+                </Flex>
+                <Flex justify={'space-between'}>
+                  <Box>Gate Used:</Box>
+                  <Text>{gate.gateName}</Text>
+                </Flex>
+                <Flex justify={'space-between'}>
+                  <Box>Date & Time:</Box>
+                  <Text>
+                    {ticket.time} | {ticket.date}
+                  </Text>
+                </Flex>
+                <Flex justify={'space-between'}>
+                  <Box>Personnel on Duty:</Box>
+                  <Text>{user.userName}</Text>
+                </Flex>
+                <Flex justify={'center'}>
+                  <QrcodeComponent ticketId={ticketId} />
+                </Flex>
+              </Stack>
+              <Button onClick={e => window.print()} colorScheme="teal" mt={4}>
+                Print Ticket
+              </Button>
+            </CardComponent>
+          </Box>
+        ) : (
+          <Box>
+            {plateNumberImage === '' ? (
+              // If plateNumberImage is empty: Show Video-Camera Component
+              <Box>
+                <CardComponent
+                  title={'SNAP PLATE NUMBER'}
+                  btnAction={capture}
+                  btnText={'Capture'}
+                >
+                  <CamComponent
+                    webcamRef={webcamRef}
+                    videoConstraints={videoConstraints}
+                  />
+                </CardComponent>
+              </Box>
+            ) : (
+              // If plateNumberImage is not empty: Show Preview Component
+              <Box>
+                <CardComponent title={'PREVIEW PLATE NUMBER'} props={btnArray}>
+                  <Box>
+                    <img src={plateNumberImage} alt="plate number img" />
+                  </Box>
+                  <Text m={3}>
+                    {isPlateNumberValid
+                      ? `Recognized Plate Number: ${plateNumber}`
+                      : `Valid Nigerian Plate Number not detected`}
+                  </Text>
 
-                <ButtonGroup mt={5}>
-                  <Button onClick={generateRandomPlateNumber}>
-                    Generate Random Plate Number
-                  </Button>
-                </ButtonGroup>
-              </CardComponent>
-            </Box>
-          )}
-        </Box>
-      )}
-    </Box>
+                  <Box>
+                    <label htmlFor="selectGate"></label>
+                    <Select
+                      id="selectGate"
+                      value={gateId}
+                      placeholder="Select gate"
+                      onChange={e => setGateId(e.target.value)}
+                    >
+                      {availableGates}
+                    </Select>
+                  </Box>
+
+                  <ButtonGroup mt={5}>
+                    <Button onClick={generateRandomPlateNumber}>
+                      Generate Random Plate Number
+                    </Button>
+                  </ButtonGroup>
+                </CardComponent>
+              </Box>
+            )}
+          </Box>
+        )}
+      </Box>
+    </>
   );
 };
 

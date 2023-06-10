@@ -17,7 +17,7 @@ const CardComponent = props => {
       maxW="xl"
       variant={'elevated'}
       align={'center'}
-      p={5}
+      p={3}
       sx={customStyles}
     >
       <Heading as={'h2'} p={5}>
