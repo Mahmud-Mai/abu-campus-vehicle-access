@@ -54,3 +54,9 @@ export const randomPlateNos = [
   'DEE-456DE',
   'DEF-789DF',
 ];
+
+export const videoConstraints = {
+  width: 400,
+  height: 400,
+  facingMode: 'environment',
+};

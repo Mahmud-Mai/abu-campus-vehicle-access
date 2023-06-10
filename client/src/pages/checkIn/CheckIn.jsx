@@ -22,7 +22,7 @@ import {
 import { selectAllGates } from '../../features/gate/gateSlice';
 import { selectAllUsers } from '../../features/users/userSlice';
 import { nanoid } from '@reduxjs/toolkit';
-import QRCodeComponent from '../../components/QrcodeComponent';
+import QrcodeComponent from '../../components/QrcodeComponent';
 
 const worker = await createWorker(); // needed by tesseract
 
@@ -72,7 +72,7 @@ const CheckIn = () => {
   }, [plateNumberImage]);
 
   // Choose a random Dummy Plate Number from a curated list
-  const useDummyPlateNo = () => {
+  const generateRandomPlateNumber = () => {
     const plateNumber =
       randomPlateNos[Math.floor(Math.random() * randomPlateNos.length)];
     setIsPlateNumberValid(validatePlateNumber(plateNumber));
@@ -125,7 +125,7 @@ const CheckIn = () => {
     },
   ];
 
-  const gateOptions = gates.map(gate => (
+  const availableGates = gates.map(gate => (
     <option key={gate.gateId} value={gate.gateId}>
       {gate.gateName}
     </option>
@@ -137,9 +137,10 @@ const CheckIn = () => {
         <Box>
           <CardComponent
             customStyles={{ backgroundColor: 'white', color: 'black' }}
+            colorScheme="teal"
             title={'ABU VEHICLE GATE PASS'}
-            btnAction={() => console.log('Generated Ticket Successfully')}
-            btnText={'Print Ticket'}
+            // btnAction={btnArray[2]}
+            // btnText={'Print Ticket'}
           >
             <Stack divider={<StackDivider />} width={'24rem'} spacing="5">
               <Flex justify={'space-between'}>
@@ -160,13 +161,13 @@ const CheckIn = () => {
                 <Box>Personnel on Duty:</Box>
                 <Text>{user.userName}</Text>
               </Flex>
-              <Flex
-                justify={'center'}
-                // mt={3}
-              >
-                <QRCodeComponent ticketId={ticketId} />
+              <Flex justify={'center'}>
+                <QrcodeComponent ticketId={ticketId} />
               </Flex>
             </Stack>
+            <Button onClick={e => window.print()} colorScheme="teal" mt={4}>
+              Print Ticket
+            </Button>
           </CardComponent>
         </Box>
       ) : (
@@ -206,13 +207,13 @@ const CheckIn = () => {
                     placeholder="Select gate"
                     onChange={e => setGateId(e.target.value)}
                   >
-                    {gateOptions}
+                    {availableGates}
                   </Select>
                 </Box>
 
                 <ButtonGroup mt={5}>
-                  <Button onClick={useDummyPlateNo}>
-                    Use Dummy Plate Number
+                  <Button onClick={generateRandomPlateNumber}>
+                    Generate Random Plate Number
                   </Button>
                 </ButtonGroup>
               </CardComponent>

@@ -1,9 +1,7 @@
 import React from 'react';
 import {
-  //   Box,
   Button,
   ButtonGroup,
-  //   ButtonGroup,
   Card,
   CardBody,
   CardFooter,
@@ -11,6 +9,8 @@ import {
 } from '@chakra-ui/react';
 
 const CardComponent = props => {
+  const { customStyles, title, children, btnAction, btnText } = props;
+
   return (
     <Card
       mx={'auto'}
@@ -18,23 +18,21 @@ const CardComponent = props => {
       variant={'elevated'}
       align={'center'}
       p={5}
-      sx={props.customStyles}
+      sx={customStyles}
     >
       <Heading as={'h2'} p={5}>
-        {props.title}
+        {title}
       </Heading>
-      <CardBody>{props.children}</CardBody>
+      <CardBody>{children}</CardBody>
       <CardFooter>
         <ButtonGroup>
-          {props.btnText ? (
-            <Button onClick={props.btnAction}>{props.btnText}</Button>
-          ) : (
+          {btnText && <Button onClick={btnAction}>{btnText}</Button>}
+          {props.props &&
             props.props.map(btn => (
               <Button key={btn.key} onClick={btn.btnAction || null}>
                 {btn.btnText}
               </Button>
-            ))
-          )}
+            ))}
         </ButtonGroup>
       </CardFooter>
     </Card>
