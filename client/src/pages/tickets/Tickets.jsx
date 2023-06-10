@@ -1,21 +1,29 @@
 import DataTable from '../../components/DataTable';
 import { useSelector } from 'react-redux';
 import { selectAllTickets } from '../../features/ticket/ticketsSlice';
+import PageHeading from '../../components/PageHeading';
+import { selectAllUsers } from '../../features/users/userSlice';
+import { selectAllGates } from '../../features/gate/gateSlice';
 
 const Tickets = () => {
+  const allAppOperators = useSelector(selectAllUsers);
+  const allGates = useSelector(selectAllGates);
   const parkingTicketsArray = useSelector(selectAllTickets);
 
   const rowData = parkingTicketsArray.map(
     ({ ticketId, plateNumber, userId, gateId, date, time }) => ({
       'Ticket Id': ticketId,
       'Plate Numbers': plateNumber,
-      'Entry Gate': Number(gateId),
+      'Entry Gate': allGates
+        .filter(gate => gate.gateId === Number(gateId))
+        .map(data => data.gateName),
       Time: time,
       Date: date,
-      'Personnel ID': userId,
+      'Personnel ID': allAppOperators
+        .filter(user => user.userId === userId)
+        .map(data => data.userName),
     })
   );
-  console.log('🚀 ~ file: Tickets.jsx:26 ~ Tickets ~ rowData:', rowData);
 
   const columnDefs = [
     { field: 'Ticket Id' },
@@ -28,6 +36,10 @@ const Tickets = () => {
 
   return (
     <div>
+      <PageHeading
+        title={'Tickets Information'}
+        subTitle={'View all tickets information'}
+      />
       <DataTable rowData={rowData} columnDefs={columnDefs} />
     </div>
   );
