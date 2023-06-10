@@ -2,14 +2,6 @@ import DataTable from '../../components/DataTable';
 import { useSelector } from 'react-redux';
 import { selectAllTickets } from '../../features/ticket/ticketsSlice';
 
-// const camelCase = str => {
-//   if (typeof str !== 'string') {
-//     return '';
-//   }
-
-//   return str.replace(/[_-]/g, '');
-// };
-
 const Tickets = () => {
   const parkingTicketsArray = useSelector(selectAllTickets);
 
@@ -24,15 +16,6 @@ const Tickets = () => {
     })
   );
   console.log('🚀 ~ file: Tickets.jsx:26 ~ Tickets ~ rowData:', rowData);
-
-  // const parkingTicketTableColumns = Object.keys(parkingTicketsArray[0]);
-
-  // const columnDefs = parkingTicketTableColumns.map(item => {
-  //   const fieldName = item;
-  //   return {
-  //     field: fieldName,
-  //   };
-  // });
 
   const columnDefs = [
     { field: 'Ticket Id' },
