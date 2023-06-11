@@ -1,14 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  Box,
-  Button,
-  ButtonGroup,
-  Flex,
-  Select,
-  Stack,
-  StackDivider,
-  Text,
-} from '@chakra-ui/react';
+import { Box, Button, Flex, Select, Text } from '@chakra-ui/react';
 import CamComponent from '../../components/CamComponent'; // component to provide camera to UI
 import CardComponent from '../../components/CardComponent';
 import { createWorker } from 'tesseract.js';
@@ -22,8 +13,8 @@ import {
 import { selectAllGates } from '../../features/gate/gateSlice';
 import { selectAllUsers } from '../../features/users/userSlice';
 import { nanoid } from '@reduxjs/toolkit';
-import QrcodeComponent from '../../components/QrcodeComponent';
 import PageHeading from '../../components/PageHeading';
+import TicketToBePrinted from './TicktetToBePrinted';
 
 const worker = await createWorker(); // needed by tesseract
 
@@ -133,64 +124,34 @@ const CheckIn = () => {
   ));
 
   return (
-    <>
+    <Box height={'100vh'}>
       <PageHeading
         title={'Vehicle Check-In'}
         subTitle={'Scan Vehicle Plate Numbers and Print their Gate Pass'}
       />
-
+      {/* Page Body to Display 3 UIs: 1) Snap plate no, 2) Ticket Builder/Previewer, 3) Print Ticket  */}
       <Box height={'85vh'}>
         {isTicketGenerated ? (
+          /* If isTicketGenerated is True: Display Ticket to be printed: UI 3 */
           <Box>
-            <CardComponent
-              customStyles={{ backgroundColor: 'white', color: 'black' }}
-              colorScheme="teal"
-              title={'ABU VEHICLE GATE PASS'}
-              // btnAction={btnArray[2]}
-              // btnText={'Print Ticket'}
-            >
-              <Stack divider={<StackDivider />} width={'24rem'} spacing="5">
-                <Flex justify={'space-between'}>
-                  <Box>Vehicle Plate Number:</Box>
-                  <Text> {ticket.plateNumber}</Text>
-                </Flex>
-                <Flex justify={'space-between'}>
-                  <Box>Gate Used:</Box>
-                  <Text>{gate.gateName}</Text>
-                </Flex>
-                <Flex justify={'space-between'}>
-                  <Box>Date & Time:</Box>
-                  <Text>
-                    {ticket.time} | {ticket.date}
-                  </Text>
-                </Flex>
-                <Flex justify={'space-between'}>
-                  <Box>Personnel on Duty:</Box>
-                  <Text>{user.userName}</Text>
-                </Flex>
-                <Flex justify={'center'}>
-                  <QrcodeComponent ticketId={ticketId} />
-                </Flex>
-              </Stack>
-              <Button onClick={e => window.print()} colorScheme="teal" mt={4}>
-                Print Ticket
-              </Button>
-            </CardComponent>
+            <TicketToBePrinted
+              ticketId={ticketId}
+              ticket={ticket}
+              gate={gate}
+              user={user}
+            />
           </Box>
         ) : (
           <Box>
             {plateNumberImage === '' ? (
-              // If plateNumberImage is empty: Show Video-Camera Component
+              // If plateNumberImage is empty: Show Video-Camera Component: UI 1
               <Box>
-                <CardComponent
-                  title={'SNAP PLATE NUMBER'}
-                  btnAction={capture}
-                  btnText={'Capture'}
-                >
+                <CardComponent title={'SNAP PLATE NUMBER'}>
                   <CamComponent
                     webcamRef={webcamRef}
                     videoConstraints={videoConstraints}
                   />
+                  <Button onClick={capture}>Capture</Button>
                 </CardComponent>
               </Box>
             ) : (
@@ -198,14 +159,35 @@ const CheckIn = () => {
               <Box>
                 <CardComponent title={'PREVIEW PLATE NUMBER'} props={btnArray}>
                   <Box>
-                    <img src={plateNumberImage} alt="plate number img" />
+                    {/* Conditionally display either the plateNumberImage Or an empty Box */}
+                    {plateNumberImage ? (
+                      <img
+                        sx={{ width: '250px', height: '300px' }}
+                        src={plateNumberImage}
+                        alt="plate number img"
+                      />
+                    ) : (
+                      <Flex
+                        sx={{
+                          width: '500px',
+                          height: '300px',
+                          border: '2px solid #f3f3f3',
+                        }}
+                        mx="auto"
+                        align="center"
+                        justify="center"
+                      >
+                        PLEASE SNAP A PLATE NUMBER!!
+                      </Flex>
+                    )}
                   </Box>
+                  {/* Text box to display the recognized characters from the picture provided   */}
                   <Text m={3}>
                     {isPlateNumberValid
                       ? `Recognized Plate Number: ${plateNumber}`
                       : `Valid Nigerian Plate Number not detected`}
                   </Text>
-
+                  {/* Options to choose Entry gates  */}
                   <Box>
                     <label htmlFor="selectGate"></label>
                     <Select
@@ -217,19 +199,17 @@ const CheckIn = () => {
                       {availableGates}
                     </Select>
                   </Box>
-
-                  <ButtonGroup mt={5}>
-                    <Button onClick={generateRandomPlateNumber}>
-                      Generate Random Plate Number
-                    </Button>
-                  </ButtonGroup>
+                  {/* Button To generate a dummy plate number for demonstration */}
+                  <Button mt={3} onClick={generateRandomPlateNumber}>
+                    Generate Random Plate Number
+                  </Button>
                 </CardComponent>
               </Box>
             )}
           </Box>
         )}
       </Box>
-    </>
+    </Box>
   );
 };
 
