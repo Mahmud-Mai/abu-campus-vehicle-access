@@ -11,8 +11,8 @@ import {
   selectAllTickets,
 } from '../../features/ticket/ticketsSlice';
 import { selectAllGates } from '../../features/gate/gateSlice';
-import { selectAllUsers } from '../../features/users/userSlice';
 import { nanoid } from '@reduxjs/toolkit';
+import { selectAllUsers } from '../../features/users/userSlice';
 import PageHeading from '../../components/PageHeading';
 import TicketToBePrinted from './TicktetToBePrinted';
 

@@ -3,12 +3,12 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = [
   {
     userId: 0,
-    userName: 'William Adams',
+    userName: 'Jacob Adams',
     role: 'Security Guard',
   },
   {
     userId: 2,
-    userName: 'Samson John',
+    userName: 'Bruno John',
     role: 'Security Guard',
   },
   {
@@ -18,7 +18,7 @@ const initialState = [
   },
   {
     userId: 3,
-    userName: 'Lawal Bala',
+    userName: 'Susan Bala',
     role: 'Super Admin',
   },
 ];

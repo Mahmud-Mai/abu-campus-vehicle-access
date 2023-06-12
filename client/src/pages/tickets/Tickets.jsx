@@ -1,3 +1,4 @@
+import React from 'react';
 import DataTable from '../../components/DataTable';
 import { useSelector } from 'react-redux';
 import { selectAllTickets } from '../../features/ticket/ticketsSlice';
@@ -20,7 +21,7 @@ const Tickets = () => {
         .map(data => data.gateName),
       Time: time,
       Date: date,
-      'Personnel ID': allAppOperators
+      'Personnel InCharge': allAppOperators
         .filter(user => user.userId === userId)
         .map(data => data.userName),
     })
@@ -32,11 +33,11 @@ const Tickets = () => {
     { field: 'Entry Gate', filter: true },
     { field: 'Time' },
     { field: 'Date', filter: true },
-    { field: 'Personnel ID', filter: true },
+    { field: 'Personnel InCharge', filter: true },
   ];
 
   return (
-    <div>
+    <>
       <PageHeading
         title={'Tickets Information'}
         subTitle={'View all tickets information'}
@@ -44,7 +45,7 @@ const Tickets = () => {
       <Flex mx={'auto'} justify={'center'}>
         <DataTable rowData={rowData} columnDefs={columnDefs} />
       </Flex>
-    </div>
+    </>
   );
 };
 
