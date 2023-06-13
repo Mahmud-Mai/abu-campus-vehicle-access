@@ -7,6 +7,7 @@ import mongoose from "mongoose";
 
 // ROUTE IMPORTS
 import ticketsRoutes from "./routes/ticketRoutes.js";
+import usersRoutes from "./routes/usersRoutes.js";
 
 // CONFIGURATIONS
 const app = express();
@@ -19,9 +20,10 @@ app.use(express.json());
 
 // ROUTES
 app.get("/", (req, res) => {
-  res.send("Server is working");
+  res.send("</h1>WELCOME TO CAMPUS VEHICLE ACCESS API</h1>");
 });
 app.use("/api/v1/tickets", ticketsRoutes);
+app.use("/api/v1/users", usersRoutes);
 
 // START SERVER & CONNECT TO DB
 const port = process.env.PORT || 5001;
