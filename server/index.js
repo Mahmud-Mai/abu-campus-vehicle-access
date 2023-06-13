@@ -5,15 +5,40 @@ import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 
+// ROUTE IMPORTS
+import ticketsRoutes from "./routes/ticketRoutes.js";
+
 // CONFIGURATIONS
 const app = express();
 dotenv.config();
+
+// MIDDLEWARE
+app.use(cors());
+app.use(bodyParser.json());
+app.use(express.json());
 
 // ROUTES
 app.get("/", (req, res) => {
   res.send("Server is working");
 });
+app.use("/api/v1/tickets", ticketsRoutes);
 
-// Connect to DB and Start listening
-const port = PORT || 5001;
-app.listen(port, () => console.log("server is listening on port 5000"));
+// START SERVER & CONNECT TO DB
+const port = process.env.PORT || 5001;
+const db_url = process.env.DATABASE_URI;
+
+const startServer = async () => {
+  try {
+    await mongoose
+      .connect(db_url)
+      .then(() =>
+        app.listen(port, () =>
+          console.log(`server connected to DB. Now listening on port ${5000}`)
+        )
+      );
+  } catch (error) {
+    console.log("Encountered an Error", error);
+  }
+};
+
+startServer();
