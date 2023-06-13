@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const TicketSchema = new mongoose.Schema(
   {
+    ticketId: String,
     plateNumber: String,
     userId: String,
     gateId: String,
