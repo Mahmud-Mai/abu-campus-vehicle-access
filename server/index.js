@@ -43,9 +43,9 @@ const startServer = async () => {
       app.listen(port, () =>
         console.log(`server connected to DB. Now listening on port ${5000}`)
       );
-      Ticket.insertMany(ticketsData);
-      User.insertMany(usersData);
-      Gate.insertMany(gatesData);
+      // Ticket.insertMany(ticketsData);
+      // User.insertMany(usersData);
+      // Gate.insertMany(gatesData);
     });
   } catch (error) {
     console.log("Encountered an Error", error);
