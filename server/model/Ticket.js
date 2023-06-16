@@ -1,11 +1,10 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const TicketSchema = new mongoose.Schema(
   {
-    ticketId: String,
     plateNumber: String,
-    userId: String,
-    gateId: String,
+    user: { type: Schema.Types.ObjectId, ref: "User" },
+    gate: { type: Schema.Types.ObjectId, ref: "Gate" },
   },
   { timestamps: true }
 );

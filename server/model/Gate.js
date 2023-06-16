@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 
 const GateSchema = new mongoose.Schema(
   {
-    gateId: Number,
     gateName: {
       type: String,
       required: true,

@@ -1,14 +1,15 @@
 // PACKAGE IMPORTS
 import express from "express";
-import bodyParser from "body-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 
 // ROUTE IMPORTS
-import ticketsRoutes from "./routes/ticketRoutes.js";
-import usersRoutes from "./routes/usersRoutes.js";
-import gatesRoutes from "./routes/gatesRoutes.js";
+import gateRoutes from "./routes/gateRoutes.js";
+import ticketRoutes from "./routes/ticketRoutes.js";
+// import userRoutes from "./routes/userRoutes.js";
+// import vehicleRoutes from "./routes/vehicleRoutes.js";
+import notFoundRoute from "./routes/notFoundRoute.js";
 
 // BULK DATA IMPORTS
 import Ticket from "./model/Ticket.js";
@@ -22,16 +23,17 @@ dotenv.config();
 
 // MIDDLEWARE
 app.use(cors());
-app.use(bodyParser.json());
-app.use(express.json());
+app.use(express.json({ extended: true }));
 
 // ROUTES
 app.get("/", (req, res) => {
   res.send("</h1>WELCOME TO CAMPUS VEHICLE ACCESS API</h1>");
 });
-app.use("/api/v1/tickets", ticketsRoutes);
-app.use("/api/v1/users", usersRoutes);
-app.use("./api/v1/gates", gatesRoutes);
+// app.use("/api/v1/vehicles", vehicleRoutes);
+app.use("/api/v1/tickets", ticketRoutes);
+// app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/gates", gateRoutes);
+app.use("*", notFoundRoute);
 
 // START SERVER & CONNECT TO DB
 const port = process.env.PORT || 5001;
@@ -39,14 +41,15 @@ const db_url = process.env.DATABASE_URI;
 
 const startServer = async () => {
   try {
-    await mongoose.connect(db_url).then(() => {
-      app.listen(port, () =>
-        console.log(`server connected to DB. Now listening on port ${5000}`)
-      );
-      // Ticket.insertMany(ticketsData);
-      // User.insertMany(usersData);
-      // Gate.insertMany(gatesData);
-    });
+    await mongoose
+      .connect(db_url)
+      .then(() => console.log("MongoDB connected succesfully"));
+    app.listen(port, () =>
+      console.log(`Server started. Now listening on port ${port}`)
+    );
+    // Ticket.insertMany(ticketsData);
+    // User.insertMany(usersData);
+    // Gate.insertMany(gatesData);
   } catch (error) {
     console.log("Encountered an Error", error);
   }

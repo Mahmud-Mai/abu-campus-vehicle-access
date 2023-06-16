@@ -1,13 +1,11 @@
 import "fs";
 import path from "path";
-import { format } from "date-fns";
-import { uuid } from "uuid";
 
 const fsPromises = fs.promises;
 
 const logEvents = async (message, fileName) => {
-  const dateTime = format(new Date(), "yyyyMMdd \t HH:mm:ss");
-  const logItem = ` ${dateTime} \t uuid() \t ${message} \n`;
+  const dateTime = new Date().toLocaleDateString;
+  const logItem = ` ${dateTime} \t ${message} \n`;
 
   try {
     if (!fileName.existsSync(path.join(__dirname, "..", "logs"))) {

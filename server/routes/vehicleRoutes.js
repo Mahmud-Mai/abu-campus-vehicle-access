@@ -1,8 +1,7 @@
 import express from "express";
-import { getAllGates } from "../controllers/gates.js";
+import { getAllVehicles } from "../controllers/vehicles.js";
 
 const router = express.Router();
 
-router.get(getAllGates);
-
+router.get(getAllVehicles);
 export default router;
