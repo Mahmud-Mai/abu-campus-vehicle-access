@@ -51,19 +51,37 @@ export const createVehice = asyncHandler(async (req, res) => {
 
   // Create Vehicle then Return results
   const newVehicle = await Vehicle.create({ plateNumber });
-  res
-    .status(201)
-    .json({
-      message: `Vehicle with plate Number: ${newVehicle.plateNumber} created successfully`,
-    });
+  res.status(201).json({
+    message: `Vehicle with plate Number: ${newVehicle.plateNumber} created successfully`,
+  });
 });
 
-// // @desc update a vehicle
-// // @route Update /vehicles/:id
-// // @access Private
-// export const updateVehicle = asyncHandler (async(req, res) => {
+// @desc update a vehicle
+// @route Update /vehicles/:id
+// @access Private
+export const updateVehicle = asyncHandler(async (req, res) => {
+  const id = req.params.id;
+  const [plateNumber] = req.body;
 
-// })
+  // Validate user data
+  if (!id)
+    return res.status(400).json({ message: "Please provide a valid Id" });
+  if (!plateNumber)
+    return res.status(400).json({ message: "plateNumber was not provided" });
+
+  // Check for duplicate
+  const duplicate = await Vehicle.findOne({ plateNumber: plateNumber });
+  if (duplicate)
+    return res.status(409).json({
+      message: "Duplicates not allowed. plateNumber is already in Use",
+    });
+
+  // Update Vehicle and Return results
+  await Vehicle.findByIdAndUpdate({ plateNumber });
+  return res
+    .status(201)
+    .json({ message: `${plateNumber} was updated succesfully` });
+});
 
 // // @desc delete a vehicle
 // // @route Delete /vehicles/:id
