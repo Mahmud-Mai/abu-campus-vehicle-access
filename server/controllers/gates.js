@@ -11,14 +11,26 @@ export const getAllGates = asyncHandler(async (req, res) => {
   if (!gates?.length)
     return res.status(400).json({ message: "No gates found" });
 
-  res.status(200).send("Get All Gates is yet to be implemented");
+  res.status(200).json(gates);
 });
 
 // @desc Get a Specific user
 // @route GET /users/:id
 // @access Private
 export const getGate = asyncHandler(async (req, res) => {
-  res.status(200).send("Get single Gate item is yet to be implemented");
+  const id = req.params.id;
+
+  // Validate user data
+  if (!id)
+    return res.status(400).json({ message: "Please provide a valid Id" });
+
+  // Check for a match
+  const gate = await Gate.findById(id).lean();
+  if (!gate)
+    return res.status(400).json({ message: "No gate matches that Id" });
+
+  // Return results
+  res.status(200).json(gate);
 });
 
 // @desc Create a gate
@@ -29,18 +41,45 @@ export const createGate = asyncHandler(async (req, res) => {
 
   // Validate user data
   if (!gateName)
-    return res.status(400).json({ message: "GateName was not provided" });
+    return res.status(400).json({ message: "Gatename was not provided" });
 
-  // Create Gate
+  // Check for duplicates
+  const duplicate = await Gate.findOne({ gateName: gateName });
+  if (duplicate)
+    return res
+      .status(409)
+      .json({ message: "Duplicates not allowed. Gatename is already in Use" });
+
+  // Create Gate, then return results
   const newGate = await Gate.create({ gateName });
-  res.status(400).json({ message: `${newGate.gateName} created successfully` });
+  res.status(201).json({ message: `${newGate.gateName} created successfully` });
 });
 
 // @desc update a gate
 // @route Update /gates/:id
 // @access Private
 export const updateGate = asyncHandler(async (req, res) => {
-  res.status(200).send("Update Gate is yet to be implemented");
+  const id = req.params.id;
+  const { gateName } = req.body;
+
+  // Validate user data
+  if (!id)
+    return res.status(400).json({ message: "Please provide a valid Id" });
+  if (!gateName)
+    return res.status(400).json({ message: "Gatename was not provided" });
+
+  // Check for duplicates: to ensure new value is different from old value
+  const duplicate = await Gate.findOne({ gateName: gateName });
+  if (duplicate)
+    return res
+      .status(409)
+      .json({ message: "Duplicates not allowed. Gatename is already in Use" });
+
+  // Update model
+  const updatedGate = await Gate.findByIdAndUpdate(id, { gateName });
+
+  // Send response
+  res.status(201).json({ message: `${gateName} was updated succesfully` });
 });
 
 // @desc delete a gate
