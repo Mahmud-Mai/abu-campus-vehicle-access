@@ -7,7 +7,7 @@ import Vehicle from "../model/Vehicle.js";
 export const getAllVehicles = asyncHandler(async (req, res) => {
   const vehicles = await Vehicle.find();
 
-  // Check for match before sending result
+  // Check for a match before sending result
   if (!vehicles)
     return res.status(400).json({ message: "Vehicles collection is empty" });
 
@@ -32,12 +32,31 @@ export const getVehicle = asyncHandler(async (req, res) => {
   res.status(200).json(vehicle);
 });
 
-// // @desc Create a vehicle
-// // @route Post /vehicles
-// // @access Private
-// export const createVehice = asyncHandler (async(req, res) => {
+// @desc Create a vehicle
+// @route Post /vehicles
+// @access Private
+export const createVehice = asyncHandler(async (req, res) => {
+  const { plateNumber } = req.body;
 
-// })
+  // Validate user data
+  if (!plateNumber)
+    return res.status(400).json({ message: "plateNumber was not provided" });
+
+  // Check for a duplicate
+  const duplicate = await Vehicle.findOne({ plateNumber }).lean();
+  if (duplicate)
+    return res.status(409).json({
+      message: "Duplicates not allowed. plateNumber is already in Use",
+    });
+
+  // Create Vehicle then Return results
+  const newVehicle = await Vehicle.create({ plateNumber });
+  res
+    .status(201)
+    .json({
+      message: `Vehicle with plate Number: ${newVehicle.plateNumber} created successfully`,
+    });
+});
 
 // // @desc update a vehicle
 // // @route Update /vehicles/:id
