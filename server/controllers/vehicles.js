@@ -83,9 +83,23 @@ export const updateVehicle = asyncHandler(async (req, res) => {
     .json({ message: `${plateNumber} was updated succesfully` });
 });
 
-// // @desc delete a vehicle
-// // @route Delete /vehicles/:id
-// // @access Private
-// export const deleteVehicle = asyncHandler (async(req, res) => {
+// @desc delete a vehicle
+// @route Delete /vehicles/:id
+// @access Private
+export const deleteVehicle = asyncHandler(async (req, res) => {
+  const id = req.params.id;
 
-// })
+  // Validate user data
+  if (!id)
+    return res.status(400).json({ message: "Please provide a valid Id" });
+  // Check for a match
+  const vehicleToBeDeleted = await Vehicle.findById(id);
+  if (!vehicleToBeDeleted)
+    return res.status(400).json({ message: "No vehicle matches that Id" });
+
+  // Delete document and Return result
+  await Gate.deleteOne(gateToBeDeleted);
+  res.status(201).json({
+    message: `${vehicleToBeDeleted.plateNumber} was deleted succesfully`,
+  });
+});
