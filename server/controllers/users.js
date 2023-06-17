@@ -16,6 +16,19 @@ export const getAllUsers = asyncHandler(async (req, res) => {
   res.status(200).json(users);
 });
 
+// @desc Get a Specific user
+// @route GET /users/:id
+// @access Private
+export const getSpecificUser = asyncHandler(async (req, res) => {
+  const id = req.params.id;
+  const user = await User.findById(id).select("-password").lean();
+
+  // Check if users exists before send all users
+  if (!user) return res.status(400).json({ message: "User does not exist" });
+
+  res.status(200).json(user);
+});
+
 // @desc Create a user
 // @route Post /users
 // @access Private
@@ -47,7 +60,7 @@ export const createUser = asyncHandler(async (req, res) => {
 });
 
 // @desc update a user
-// @route Update /users
+// @route Update /users/:id
 // @access Private
 export const updateUser = asyncHandler(async (req, res) => {
   const id = req.params.id;
@@ -77,7 +90,7 @@ export const updateUser = asyncHandler(async (req, res) => {
 });
 
 // @desc delete a user
-// @route Delete /users
+// @route Delete /users/:id
 // @access Private
 export const deleteUser = asyncHandler(async (req, res) => {
   const id = req.params.id;
