@@ -14,10 +14,23 @@ export const getAllVehicles = asyncHandler(async (req, res) => {
   res.status(200).json(vehicles);
 });
 
-// @desc Get a Specific user
-// @route GET /users/:id
+// @desc Get a Specific vehicle
+// @route GET /vehicles/:id
 // @access Private
-export const getVehicle = asyncHandler(async (req, res) => {});
+export const getVehicle = asyncHandler(async (req, res) => {
+  const id = req.params.id;
+
+  // Validate user data
+  if (!id)
+    return res.status(400).json({ message: "Please provide a valid Id" });
+
+  // Check for match
+  const vehicle = await Vehicle.findById(id);
+  return res.status(400).json({ message: "No vehicle matches that Id" });
+
+  // Return results
+  res.status(200).json(vehicle);
+});
 
 // // @desc Create a vehicle
 // // @route Post /vehicles
