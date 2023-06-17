@@ -1,8 +1,8 @@
 import express from "express";
 import {
+  getAllGates,
   createGate,
   deleteGate,
-  getAllGates,
   getGate,
   updateGate,
 } from "../controllers/gates.js";
