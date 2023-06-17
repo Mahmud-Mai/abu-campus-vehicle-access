@@ -25,7 +25,15 @@ export const getGate = asyncHandler(async (req, res) => {
 // @route Post /gates
 // @access Private
 export const createGate = asyncHandler(async (req, res) => {
-  res.status(200).json("Create Gate is yet to be implemented");
+  const { gateName } = req.body;
+
+  // Validate user data
+  if (!gateName)
+    return res.status(400).json({ message: "GateName was not provided" });
+
+  // Create Gate
+  const newGate = await Gate.create({ gateName });
+  res.status(400).json({ message: `${newGate.gateName} created successfully` });
 });
 
 // @desc update a gate
