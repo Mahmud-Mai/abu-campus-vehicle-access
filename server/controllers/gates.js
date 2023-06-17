@@ -86,7 +86,24 @@ export const updateGate = asyncHandler(async (req, res) => {
 // @route Delete /gates/:id
 // @access Private
 export const deleteGate = asyncHandler(async (req, res) => {
-  res.status(200).send("Delete Gate is yet to be implemented");
+  const id = req.params.id;
+
+  // Validate user data
+  if (!id)
+    return res.status(400).json({ message: "Please provide a valid Id" });
+  // Check for a match
+  const gateToBeDeleted = await Gate.findById(id);
+  if (!gateToBeDeleted)
+    return res.status(400).json({ message: "No gate matches that Id" });
+
+  // Delete document
+  const deletedGate = await Gate.deleteOne(gateToBeDeleted);
+
+  // Send responde
+  if (deletedGate)
+    return res
+      .status(201)
+      .json({ message: `${gateToBeDeleted.gateName} was deleted succesfully` });
 });
 
 // try {
