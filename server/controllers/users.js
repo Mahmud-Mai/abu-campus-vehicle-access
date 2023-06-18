@@ -9,7 +9,7 @@ import Ticket from "../models/Ticket.js";
 export const getAllUsers = asyncHandler(async (req, res) => {
   const users = await User.find().select("-password").lean();
 
-  // Check if users exists before send all users
+  // Check if users exists before returning results
   if (!users?.length)
     return res.status(400).json({ message: "No users found" });
 
@@ -21,9 +21,12 @@ export const getAllUsers = asyncHandler(async (req, res) => {
 // @access Private
 export const getSpecificUser = asyncHandler(async (req, res) => {
   const id = req.params.id;
-  const user = await User.findById(id).select("-password").lean();
 
-  // Check if users exists before send all users
+  // Validate user data
+  if (!id) res.status(400).json({ message: "Please provide a valid Id" });
+
+  // Check if users exists before returning results
+  const user = await User.findById(id).select("-password").lean();
   if (!user) return res.status(400).json({ message: "User does not exist" });
 
   res.status(200).json(user);
@@ -35,7 +38,7 @@ export const getSpecificUser = asyncHandler(async (req, res) => {
 export const createUser = asyncHandler(async (req, res) => {
   const { userName, email, password, role, active } = req.body;
 
-  // Confirm data
+  // Validate user data
   if (!userName || !email || !password || !role?.length || !active) {
     return res.status(400).json({ message: "All fields are required" });
   }
@@ -66,12 +69,12 @@ export const updateUser = asyncHandler(async (req, res) => {
   const id = req.params.id;
   const { userName, email, password, role, active } = req.body;
 
-  // Confrim data id
+  // Validate user data
   if (!userName || !email || !role?.length || active === null || undefined) {
     return res.status(400).json({ message: "Required fields are missing" });
   }
 
-  // Confirm useer exists
+  // Confirm user exists
   const user = await User.findById(id).exec();
   if (!user) return res.status(409).json({ message: "User does not exist" });
 
@@ -95,7 +98,7 @@ export const updateUser = asyncHandler(async (req, res) => {
 export const deleteUser = asyncHandler(async (req, res) => {
   const id = req.params.id;
 
-  // Confirm user data
+  // Validate user data
   if (!id) return res.status(400).json({ message: "User Id is not provided" });
 
   // Check if user has created tickets
