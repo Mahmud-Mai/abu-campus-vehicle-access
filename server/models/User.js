@@ -1,8 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
-import AutoIncrementFactory from "mongoose-sequence";
-
-const AutoIncrement = AutoIncrementFactory(mongoose);
+// import { SequenceFactory } from "mongoose-sequence";
+// const AutoIncrement = SequenceFactory(mongoose);
 
 const UserSchema = new mongoose.Schema(
   {
@@ -29,8 +28,8 @@ const UserSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["School Security", "Admin", "Super Admin"],
-      default: "School Security",
+      enum: ["Security", "Admin", "Super Admin"],
+      default: "Security",
     },
     active: {
       type: Boolean,
@@ -40,11 +39,11 @@ const UserSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-UserSchema.plugin(AutoIncrement, {
-  inc_field: "userNums",
-  id: "userId",
-  start_seq: 1,
-});
+// UserSchema.plugin(AutoIncrement, {
+//   inc_field: "userNums",
+//   id: "userId",
+//   start_seq: 1,
+// });
 
 const User = mongoose.model("User", UserSchema);
 export default User;

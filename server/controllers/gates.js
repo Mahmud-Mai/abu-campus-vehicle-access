@@ -14,8 +14,8 @@ export const getAllGates = asyncHandler(async (req, res) => {
   res.status(200).json(gates);
 });
 
-// @desc Get a Specific user
-// @route GET /users/:id
+// @desc Get a Specific gate
+// @route GET /gates/:id
 // @access Private
 export const getGate = asyncHandler(async (req, res) => {
   const id = req.params.id;
@@ -79,7 +79,10 @@ export const updateGate = asyncHandler(async (req, res) => {
   const updatedGate = await Gate.findByIdAndUpdate(id, { gateName });
 
   // Send response
-  res.status(201).json({ message: `${gateName} was updated succesfully` });
+  if (updatedGate)
+    return res
+      .status(201)
+      .json({ message: `${gateName} was updated succesfully` });
 });
 
 // @desc delete a gate
@@ -99,16 +102,9 @@ export const deleteGate = asyncHandler(async (req, res) => {
   // Delete document
   const deletedGate = await Gate.deleteOne(gateToBeDeleted);
 
-  // Send responde
+  // Send response
   if (deletedGate)
     return res
       .status(201)
       .json({ message: `${gateToBeDeleted.gateName} was deleted succesfully` });
 });
-
-// try {
-//   const gates = await Gate.find;
-//   res.send(200).json(gates);
-// } catch (error) {
-//   res.send(400).json({ message: error });
-// }
