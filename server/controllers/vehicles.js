@@ -1,6 +1,5 @@
 import asyncHandler from "express-async-handler";
-import Vehicle from "../model/Vehicle.js";
-
+import Vehicle from "../models/Vehicle.js";
 // @desc Get all vehicle
 // @route GET /vehicles
 // @access Private
@@ -26,7 +25,8 @@ export const getVehicle = asyncHandler(async (req, res) => {
 
   // Check for match
   const vehicle = await Vehicle.findById(id);
-  return res.status(400).json({ message: "No vehicle matches that Id" });
+  if (!vehicle)
+    return res.status(400).json({ message: "No vehicle matches that Id" });
 
   // Return results
   res.status(200).json(vehicle);
@@ -61,7 +61,7 @@ export const createVehice = asyncHandler(async (req, res) => {
 // @access Private
 export const updateVehicle = asyncHandler(async (req, res) => {
   const id = req.params.id;
-  const [plateNumber] = req.body;
+  const { plateNumber } = req.body;
 
   // Validate user data
   if (!id)
@@ -77,7 +77,7 @@ export const updateVehicle = asyncHandler(async (req, res) => {
     });
 
   // Update Vehicle and Return results
-  await Vehicle.findByIdAndUpdate({ plateNumber });
+  await Vehicle.findByIdAndUpdate(id, { plateNumber: plateNumber });
   return res
     .status(201)
     .json({ message: `${plateNumber} was updated succesfully` });
@@ -98,7 +98,7 @@ export const deleteVehicle = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "No vehicle matches that Id" });
 
   // Delete document and Return result
-  await Gate.deleteOne(gateToBeDeleted);
+  await Vehicle.deleteOne(vehicleToBeDeleted);
   res.status(201).json({
     message: `${vehicleToBeDeleted.plateNumber} was deleted succesfully`,
   });
