@@ -1,5 +1,5 @@
 import express from "express";
-import notFound from "../controllers/notFound.js";
+import { notFound } from "../controllers/notFound.js";
 
 const router = express.Router();
 
