@@ -1,18 +1,35 @@
 import asyncHandler from "express-async-handler";
-import Blacklist from "../models/Blacklist";
-import Vehicle from "../models/Vehicle";
+import Blacklist from "../models/Blacklist.js";
+import Vehicle from "../models/Vehicle.js";
 
 // @desc Get all blacklist
 // @route GET /blacklists
 // @access Private
 export const getAllBlacklists = asyncHandler(async (req, res) => {
-  const blacklists = await Blacklist.find().lean();
+  const blacklists = await Blacklist.find();
 
   // Check for a match before sending result
-  if (!blacklists)
+  if (!blacklists?.length)
     return res.status(400).json({ message: "Blacklist is empty" });
 
-  res.status(200).json(blacklists);
+  // Populate the plate number from the associated vehicle
+  const populatedBlacklists = await Promise.all(
+    blacklists.map(async (blacklist) => {
+      await blacklist.populate("vehicle", "plateNumber");
+
+      const plateNumber = blacklist.vehicle
+        ? blacklist.vehicle.plateNumber
+        : null;
+
+      return {
+        ...blacklist.toObject(),
+        plateNumber,
+      };
+    })
+  );
+
+  // Return result with the plate number included
+  res.status(200).json(populatedBlacklists);
 });
 
 // @desc Get a Specific blacklist
@@ -26,12 +43,20 @@ export const getBlacklist = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "Please provide a valid Id" });
 
   // check For a match
-  const blacklist = await Blacklist.findById(id).lean();
+  const blacklist = await Blacklist.findById(id);
   if (!blacklist)
     return res.status(400).json({ message: "No blacklist matches that Id" });
 
-  // Return results
-  res.status(200).json(blacklist);
+  // Populate the plate number from the associated vehicle
+  await blacklist.populate("vehicle", "plateNumber");
+
+  // Return result with the plate number included
+  const { vehicle: blacklistedVehicle, ...result } = blacklist.toObject();
+  result.plateNumber = blacklistedVehicle
+    ? blacklistedVehicle.plateNumber
+    : null;
+
+  res.status(200).json(result);
 });
 
 // @desc Create a blacklist
@@ -44,16 +69,32 @@ export const createBlacklist = asyncHandler(async (req, res) => {
   if (!vehicle || !status || !reason)
     return res.status(400).json({ message: "Please provide required fields" });
 
+  // Check for duplicate
+  const duplicate = await Blacklist.findOne({ vehicle });
+  if (duplicate) {
+    return res.status(400).json({ message: "Vehicle is already blacklisted" });
+  }
+
   // Check for a match
-  const vehicleToBlacklist = await Vehicle.findById(vehicle).lean();
+  const vehicleToBlacklist = await Vehicle.findById(vehicle);
+
   if (!vehicleToBlacklist)
     return res.status(400).json({ message: "No vehicle matches that Id" });
 
   // Create document
-  const blacklistObject = { vehicle, status, reason };
-  const result = await Blacklist.create({ blacklistObject });
+  const blacklist = await Blacklist.create({ vehicle, status, reason });
 
-  // Return result
+  // Populate the plate number from the associated vehicle
+  await blacklist.populate("vehicle", "plateNumber");
+
+  // Return result including plate Number
+  const { vehicle: blacklistedVehicle, ...result } = blacklist.toObject();
+
+  // Check if vehicle is null
+  result.plateNumber = blacklistedVehicle
+    ? blacklistedVehicle.plateNumber
+    : null;
+
   res.status(200).json(result);
 });
 
@@ -77,7 +118,22 @@ export const updateBlacklist = asyncHandler(async (req, res) => {
 
   // Update document
   const blacklistObject = { status, reason };
-  const result = await Blacklist.findByIdAndUpdate(id, blacklistObject);
+  const updatedBlacklist = await Blacklist.findByIdAndUpdate(
+    id,
+    blacklistObject
+  );
+
+  // Populate plate Number
+  await updatedBlacklist.populate("vehicle", "plateNumber");
+
+  // Return result including plate Number
+  const { vehicle: blacklistedVehicle, ...result } =
+    updatedBlacklist.toObject();
+
+  // Check if vehicle is null
+  result.plateNumber = blacklistedVehicle
+    ? blacklistedVehicle.plateNumber
+    : null;
 
   // Return result
   res.status(200).json(result);
