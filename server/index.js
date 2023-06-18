@@ -2,24 +2,28 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import mongoose from "mongoose";
+import mongoose, { mongo } from "mongoose";
 
 // ROUTE IMPORTS
+import blacklistRoutes from "./routes/blacklistRoutes.js";
 import gateRoutes from "./routes/gateRoutes.js";
 import ticketRoutes from "./routes/ticketRoutes.js";
-// import userRoutes from "./routes/userRoutes.js";
-// import vehicleRoutes from "./routes/vehicleRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import vehicleRoutes from "./routes/vehicleRoutes.js";
 import notFoundRoute from "./routes/notFoundRoute.js";
 
-// BULK DATA IMPORTS
-import Ticket from "./model/Ticket.js";
-import User from "./model/User.js";
-import Gate from "./model/Gate.js";
-import { ticketsData, usersData, gatesData } from "./data/index.js";
+// INTERNAL IMPORTS
+import connectToDatabase from "./config/connectDB.js";
+// import Ticket from "./models/Ticket.js";
+// import User from "./models/User.js";
+// import Gate from "./models/Gate.js";
+// import { ticketsData, usersData, gatesData } from "./data/index.js";
+// import errorHandler from "./middleware/errorHandler.js"; // Fix custom middleware later
 
 // CONFIGURATIONS
 const app = express();
 dotenv.config();
+connectToDatabase();
 
 // MIDDLEWARE
 app.use(cors());
@@ -30,29 +34,28 @@ app.get("/", (req, res) => {
   res.send("</h1>WELCOME TO CAMPUS VEHICLE ACCESS API</h1>");
 });
 // app.use("/api/v1/vehicles", vehicleRoutes);
-app.use("/api/v1/tickets", ticketRoutes);
-// app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/blacklists", blacklistRoutes);
 app.use("/api/v1/gates", gateRoutes);
+app.use("/api/v1/tickets", ticketRoutes);
+app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/vehicles", vehicleRoutes);
 app.use("*", notFoundRoute);
 
 // START SERVER & CONNECT TO DB
 const port = process.env.PORT || 5001;
-const db_url = process.env.DATABASE_URI;
 
-const startServer = async () => {
-  try {
-    await mongoose
-      .connect(db_url)
-      .then(() => console.log("MongoDB connected succesfully"));
-    app.listen(port, () =>
-      console.log(`Server started. Now listening on port ${port}`)
-    );
-    // Ticket.insertMany(ticketsData);
-    // User.insertMany(usersData);
-    // Gate.insertMany(gatesData);
-  } catch (error) {
-    console.log("Encountered an Error", error);
-  }
-};
+// ERROR HANDLER MIDDLEWARE: TO BE IMPORTED AT END(JUST BEFORE APP STARTS TO LISTEN)
+// app.use(errorHandler());
 
-startServer();
+mongoose.connection.once("open", () => {
+  console.log("Connected to MongoDB succesfully");
+  app.listen(port, () => console.log(`Server started on port ${port}`));
+});
+
+mongoose.connection.on("error", (err) => {
+  console.log({ err });
+  // Use logger middleware here
+});
+// Ticket.insertMany(ticketsData);
+// User.insertMany(usersData);
+// Gate.insertMany(gatesData);
