@@ -4,13 +4,29 @@ import Vehicle from "../models/Vehicle.js";
 // @route GET /vehicles
 // @access Private
 export const getAllVehicles = asyncHandler(async (req, res) => {
-  const vehicles = await Vehicle.find();
+  const vehicles = await Vehicle.find().exec();
 
-  // Check for a match before sending result
-  if (!vehicles)
+  // Check for a match
+  if (!vehicles?.length)
     return res.status(400).json({ message: "Vehicles collection is empty" });
 
-  res.status(200).json(vehicles);
+  // Populate blacklistStatus
+  const vehiclesWithPopulatedStatuses = await Promise.all(
+    vehicles.map(async (vehicle) => {
+      await vehicle.populate("blacklistStatus", "status");
+
+      const status = vehicle.blacklistStatus
+        ? vehicle.blacklistStatus.status
+        : null;
+      return {
+        ...vehicle.toObject(),
+        status,
+      };
+    })
+  );
+
+  // Send result
+  res.status(200).json(vehiclesWithPopulatedStatuses);
 });
 
 // @desc Get a Specific vehicle
@@ -28,8 +44,16 @@ export const getVehicle = asyncHandler(async (req, res) => {
   if (!vehicle)
     return res.status(400).json({ message: "No vehicle matches that Id" });
 
+  // Populate blacklistStatus from the associated blacklist document
+  await vehicle.populate("blacklistStatus", "status");
+
+  // Include the blacklist status in the result
+  const { blacklistStatus: blacklistedItem, ...result } = vehicle.toObject();
+
+  result.blacklistStatus = blacklistedItem ? blacklistedItem.status : null;
+
   // Return results
-  res.status(200).json(vehicle);
+  res.status(200).json(result);
 });
 
 // @desc Create a vehicle
@@ -49,8 +73,10 @@ export const createVehice = asyncHandler(async (req, res) => {
       message: "Duplicates not allowed. plateNumber is already in Use",
     });
 
-  // Create Vehicle then Return results
+  // Create Vehicle
   const newVehicle = await Vehicle.create({ plateNumber });
+
+  // Return results
   res.status(201).json({
     message: `Vehicle with plate Number: ${newVehicle.plateNumber} created successfully`,
   });
