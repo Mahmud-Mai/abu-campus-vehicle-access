@@ -86,4 +86,22 @@ export const updateBlacklist = asyncHandler(async (req, res) => {
 // @desc delete a blacklist
 // @route Delete /blacklists/:id
 // @access Private
-// export const deleteBlacklist = asyncHandler(async (req, res) => {});
+export const deleteBlacklist = asyncHandler(async (req, res) => {
+  const id = req.params.id;
+
+  // Validate user data
+  if (!id)
+    return res.status(400).json({ message: "Please provide a valid Id" });
+  // Check for a match
+  const blaclistToBeDeleted = await Blacklist.findById(id);
+  if (!blaclistToBeDeleted)
+    return res.status(400).json({ message: "No gate matches that Id" });
+
+  // Delete document
+  const deletedGate = await Blacklist.deleteOne(blaclistToBeDeleted);
+
+  // Send response
+  res
+    .status(201)
+    .json({ message: `${blaclistToBeDeleted} was deleted succesfully` });
+});
