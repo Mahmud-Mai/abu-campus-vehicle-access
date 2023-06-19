@@ -14,25 +14,6 @@ export const getAllGates = asyncHandler(async (req, res) => {
   res.status(200).json(gates);
 });
 
-// @desc Get a Specific gate
-// @route GET /gates/:id
-// @access Private
-export const getGate = asyncHandler(async (req, res) => {
-  const id = req.params.id;
-
-  // Validate user data
-  if (!id)
-    return res.status(400).json({ message: "Please provide a valid Id" });
-
-  // Check for a match
-  const gate = await Gate.findById(id).lean();
-  if (!gate)
-    return res.status(400).json({ message: "No gate matches that Id" });
-
-  // Return results
-  res.status(200).json(gate);
-});
-
 // @desc Create a gate
 // @route Post /gates
 // @access Private
@@ -53,6 +34,25 @@ export const createGate = asyncHandler(async (req, res) => {
   // Create Gate, then return results
   const newGate = await Gate.create({ gateName });
   res.status(201).json({ message: `${newGate.gateName} created successfully` });
+});
+
+// @desc Get a Specific gate
+// @route GET /gates/:id
+// @access Private
+export const getGate = asyncHandler(async (req, res) => {
+  const id = req.params.id;
+
+  // Validate user data
+  if (!id)
+    return res.status(400).json({ message: "Please provide a valid Id" });
+
+  // Check for a match
+  const gate = await Gate.findById(id).lean();
+  if (!gate)
+    return res.status(400).json({ message: "No gate matches that Id" });
+
+  // Return results
+  res.status(200).json(gate);
 });
 
 // @desc update a gate
