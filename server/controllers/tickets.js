@@ -1,11 +1,11 @@
-import { Schema } from "mongoose";
 import Ticket from "../models/Ticket.js";
 import Vehicle from "../models/Vehicle.js";
 import asyncHandler from "express-async-handler";
-asyncHandler;
+import Gate from "../models/Gate.js";
+import User from "../models/User.js";
 
-// @desc Get all gates
-// @route GET /gates
+// @desc Get all ticket
+// @route GET /ticket
 // @access Private
 export const getAllTickets = asyncHandler(async (req, res) => {
   const tickets = await Ticket.find();
@@ -21,6 +21,13 @@ export const getAllTickets = asyncHandler(async (req, res) => {
       await ticket.populate({ path: "plateNumber", select: "plateNumber" });
       await ticket.populate({ path: "user", select: "userName" });
       await ticket.populate({ path: "gate", select: "gateName" });
+
+      console.log("🚀 ~ getAllTickets ~ tickets:", {
+        plateNumber,
+        gate,
+        user,
+        ...ticket.toObject(),
+      });
 
       const plateNumber = ticket.plateNumber
         ? ticket.plateNumber.plateNumber
@@ -40,34 +47,81 @@ export const getAllTickets = asyncHandler(async (req, res) => {
   res.status(200).json(populatedTickets);
 });
 
-// @desc Create a gate
-// @route Post /gates
+// @desc Create a ticket
+// @route Post /tickets
 // @access Private
-// export const createTicket = asyncHandler(async (req, res) => {
-//   // const newTicket = await Ticket.create(req.body);
-//   // res.json(newTicket);
+export const createTicket = asyncHandler(async (req, res) => {
+  const { plateNumber, gate, ticketStatus, user } = req.body;
 
-//   const plateNoOfInterest = req.body.plateNo;
-//   const vehicleOfInterest = await Vehicle.findOne({
-//     plateNumber: plateNoOfInterest,
-//   });
+  await Ticket.deleteMany({ ticketStatus: "Outbound" });
 
-//   if (vehicleOfInterest) {
-//     res.send("Yes VOI exists: " + vehicleOfInterest + " " + true);
-//   } else {
-//     res.send("No VOI does not exist: " + vehicleOfInterest + " " + false);
-//   }
-// });
+  // Validate user data
+  if (!plateNumber || !gate || !ticketStatus || !user)
+    return res.status(400).json({ message: "Please provide required fields" });
 
-// @desc Get a Specific gate
-// @route GET /gates/:id
+  // Check if vehicle exists
+  const vehicleObject = await Vehicle.findOne({ plateNumber: plateNumber });
+  console.log("🚀 createTicket ~ vehicleObject._id:", vehicleObject._id);
+
+  if (!vehicleObject)
+    return res
+      .status(400)
+      .json({ message: "The plateNumber provided is not in the Database" });
+
+  // Convert plateNumber to ObjectId
+  const plateNumberObjectId = mongoose.Types.ObjectId(vehicleObject._id);
+
+  // Check if gate exists
+  const gateObject = await Gate.findOne({ gateName: gate });
+  console.log("🚀 createTicket ~ gateObject._id:", gateObject._id);
+  if (!gateObject) {
+    return res
+      .status(400)
+      .json({ message: "The gate provided is not in the Database" });
+  }
+
+  // Check if user exists
+  const userObject = await User.findOne({ userName: user });
+  console.log("🚀 createTicket ~ userObject._id:", userObject._id);
+  if (!userObject) {
+    return res
+      .status(400)
+      .json({ message: "The user provided is not in the Database" });
+  }
+
+  // Check vehicle has no open tickets
+  const hasPrevTickets = await Ticket.find({ plateNumber });
+  const prevTicketIsOpen = hasPrevTickets.some((prevTicket) => {
+    return prevTicket.ticketStatus === "Outbound";
+  });
+
+  if (prevTicketIsOpen) {
+    return res
+      .status(400)
+      .json({ message: "Vehicle already has an open ticket" });
+  }
+
+  // Create Ticket
+  const ticket = await Ticket.create({
+    gate: gateObject._id,
+    plateNumber: vehicleObject._id,
+    ticketStatus,
+    user: userObject._id,
+  });
+
+  // Create ticket
+  res.status(200).json(ticket);
+});
+
+// @desc Get a Specific ticket
+// @route GET /tickets/:id
 // @access Private
 // export const getTicket = asyncHandler( async (req, res) => {})
 
-// @desc update a gate
-// @route Update /gates/:id
+// @desc update a ticket
+// @route Update /tickets/:id
 // @access Private
-// @desc delete a gate
-// @route Delete /gates/:id
+// @desc delete a ticket
+// @route Delete /tickets/:id
 // @access Private
 // export const getTicket = asyncHandler( async (req, res) => {})
