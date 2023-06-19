@@ -104,9 +104,7 @@ export const updateVehicle = asyncHandler(async (req, res) => {
 
   // Update Vehicle and Return results
   await Vehicle.findByIdAndUpdate(id, { plateNumber: plateNumber });
-  return res
-    .status(201)
-    .json({ message: `${plateNumber} was updated succesfully` });
+  res.status(201).json({ message: `${plateNumber} was updated succesfully` });
 });
 
 // @desc delete a vehicle

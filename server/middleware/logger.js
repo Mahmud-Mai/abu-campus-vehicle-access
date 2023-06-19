@@ -1,9 +1,9 @@
-import "fs";
+import * as fs from "fs";
 import path from "path";
 
 const fsPromises = fs.promises;
 
-const logEvents = async (message, fileName) => {
+export const logEvents = async (message, fileName) => {
   const dateTime = new Date().toLocaleDateString;
   const logItem = ` ${dateTime} \t ${message} \n`;
 

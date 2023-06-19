@@ -1,11 +1,15 @@
-import { logger } from "./logger";
+import { logEvents } from "./logger.js";
 
-export const errorHandler = (err, req, res, next) => {
-  const logMsg = `${err.name} \t ${err.message} \t ${req.method} \t ${req.url} \t ${req.headers.origin} \t`;
+const errorHandler = (err, req, res, next) => {
+  // const logMsg = `${err.name}: ${err.message}\t${req.method}\t${req.url}\t${req.headers.origin}`;
 
-  logEvents(logMsg, "errLog.log");
+  // logEvents(logMsg, "errLog.log");
+  console.log("Custom Error middleware: ", err);
 
-  const status = res.statusCode ? res.statusCode : 500;
+  const status = res.statusCode ? res.statusCode : 500; // server error
 
   res.status(status).json({ message: err.message });
+  next();
 };
+
+export default errorHandler;

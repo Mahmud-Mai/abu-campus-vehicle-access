@@ -8,7 +8,7 @@ import Vehicle from "../models/Vehicle.js";
 export const getAllBlacklists = asyncHandler(async (req, res) => {
   const blacklists = await Blacklist.find();
 
-  // Check for a match before sending result
+  // Check for a match
   if (!blacklists?.length)
     return res.status(400).json({ message: "Blacklist is empty" });
 
@@ -51,10 +51,8 @@ export const getBlacklist = asyncHandler(async (req, res) => {
   await blacklist.populate("vehicle", "plateNumber");
 
   // Return result with the plate number included
-  const { vehicle: blacklistedVehicle, ...result } = blacklist.toObject();
-  result.plateNumber = blacklistedVehicle
-    ? blacklistedVehicle.plateNumber
-    : null;
+  const { vehicle: blacklistedItem, ...result } = blacklist.toObject();
+  result.plateNumber = blacklistedItem ? blacklistedItem.plateNumber : null;
 
   res.status(200).json(result);
 });

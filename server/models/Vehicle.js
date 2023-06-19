@@ -6,6 +6,7 @@ const VehicleSchema = new Schema({
     unique: true,
     required: true,
   },
+  blacklistStatus: { type: Schema.Types.ObjectId, ref: "Blacklist" },
 });
 
 const Vehicle = new model("Vehicle", VehicleSchema);

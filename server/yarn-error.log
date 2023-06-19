@@ -1,0 +1,49 @@
+Arguments: 
+  /usr/bin/node /usr/bin/yarn add express-async-handler
+
+PATH: 
+  /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin
+
+Yarn version: 
+  1.22.19
+
+Node version: 
+  18.16.0
+
+Platform: 
+  linux x64
+
+Trace: 
+  Error: getaddrinfo EAI_AGAIN registry.yarnpkg.com
+      at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:107:26)
+
+npm manifest: 
+  {
+    "dependencies": {
+      "body-parser": "^1.20.2",
+      "cors": "^2.8.5",
+      "dotenv": "^16.1.1",
+      "express": "^4.18.2",
+      "mongoose": "^7.2.2",
+      "nodemon": "^2.0.22"
+    },
+    "name": "campus-vehicle-access",
+    "version": "1.0.0",
+    "main": "index.js",
+    "type": "module",
+    "devDependencies": {},
+    "scripts": {
+      "start": "node index",
+      "dev": "nodemon index"
+    },
+    "keywords": [],
+    "author": "Mahmud Mai",
+    "license": "ISC",
+    "description": ""
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

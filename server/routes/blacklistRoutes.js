@@ -5,7 +5,7 @@ import {
   getAllBlacklists,
   getBlacklist,
   updateBlacklist,
-} from "../controllers/blacklist";
+} from "../controllers/blacklist.js";
 
 const router = express.Router();
 

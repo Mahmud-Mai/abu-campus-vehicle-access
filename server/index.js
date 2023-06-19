@@ -13,7 +13,7 @@ import vehicleRoutes from "./routes/vehicleRoutes.js";
 import notFoundRoute from "./routes/notFoundRoute.js";
 
 // INTERNAL IMPORTS
-import connectToDatabase from "./config/connectDB.js";
+import { connectToDatabase } from "./config/connectDB.js";
 // import Ticket from "./models/Ticket.js";
 // import User from "./models/User.js";
 // import Gate from "./models/Gate.js";
@@ -53,7 +53,7 @@ mongoose.connection.once("open", () => {
 });
 
 mongoose.connection.on("error", (err) => {
-  console.log({ err });
+  console.log(err.message);
   // Use logger middleware here
 });
 // Ticket.insertMany(ticketsData);
