@@ -22,13 +22,6 @@ export const getAllTickets = asyncHandler(async (req, res) => {
       await ticket.populate({ path: "user", select: "userName" });
       await ticket.populate({ path: "gate", select: "gateName" });
 
-      console.log("🚀 ~ getAllTickets ~ tickets:", {
-        plateNumber,
-        gate,
-        user,
-        ...ticket.toObject(),
-      });
-
       const plateNumber = ticket.plateNumber
         ? ticket.plateNumber.plateNumber
         : null;
@@ -53,27 +46,30 @@ export const getAllTickets = asyncHandler(async (req, res) => {
 export const createTicket = asyncHandler(async (req, res) => {
   const { plateNumber, gate, ticketStatus, user } = req.body;
 
-  await Ticket.deleteMany({ ticketStatus: "Outbound" });
-
   // Validate user data
   if (!plateNumber || !gate || !ticketStatus || !user)
     return res.status(400).json({ message: "Please provide required fields" });
 
   // Check if vehicle exists
-  const vehicleObject = await Vehicle.findOne({ plateNumber: plateNumber });
-  console.log("🚀 createTicket ~ vehicleObject._id:", vehicleObject._id);
-
+  const vehicleObject = await Vehicle.findById(plateNumber);
   if (!vehicleObject)
     return res
       .status(400)
       .json({ message: "The plateNumber provided is not in the Database" });
 
-  // Convert plateNumber to ObjectId
-  const plateNumberObjectId = mongoose.Types.ObjectId(vehicleObject._id);
+  // Check vehicle has no open tickets
+  const ticketObject = await Ticket.findOne({ plateNumber: plateNumber });
+  const previousOpenTickets = ticketObject
+    ? ticketObject.ticketStatus === "Inbound"
+    : false;
+
+  if (previousOpenTickets)
+    return res
+      .status(400)
+      .json({ message: "Vehicle already has an open ticket" });
 
   // Check if gate exists
   const gateObject = await Gate.findOne({ gateName: gate });
-  console.log("🚀 createTicket ~ gateObject._id:", gateObject._id);
   if (!gateObject) {
     return res
       .status(400)
@@ -82,46 +78,112 @@ export const createTicket = asyncHandler(async (req, res) => {
 
   // Check if user exists
   const userObject = await User.findOne({ userName: user });
-  console.log("🚀 createTicket ~ userObject._id:", userObject._id);
   if (!userObject) {
     return res
       .status(400)
       .json({ message: "The user provided is not in the Database" });
   }
 
-  // Check vehicle has no open tickets
-  const hasPrevTickets = await Ticket.find({ plateNumber });
-  const prevTicketIsOpen = hasPrevTickets.some((prevTicket) => {
-    return prevTicket.ticketStatus === "Outbound";
-  });
-
-  if (prevTicketIsOpen) {
-    return res
-      .status(400)
-      .json({ message: "Vehicle already has an open ticket" });
-  }
-
   // Create Ticket
   const ticket = await Ticket.create({
+    plateNumber,
     gate: gateObject._id,
-    plateNumber: vehicleObject._id,
     ticketStatus,
     user: userObject._id,
   });
 
   // Create ticket
-  res.status(200).json(ticket);
+  res.status(201).json(ticket);
 });
 
 // @desc Get a Specific ticket
 // @route GET /tickets/:id
 // @access Private
-// export const getTicket = asyncHandler( async (req, res) => {})
+export const getTicket = asyncHandler(async (req, res) => {
+  const id = req.params.id;
+
+  // Validate user data
+  if (!id)
+    return res.status(400).json({ message: "Please provide a valid Id" });
+
+  // Check for match
+  const ticket = await Ticket.findById(id);
+  if (!ticket)
+    return res.status(400).json({ message: "No ticket matches that Id" });
+
+  // Populate plateNumber, user, gate fields, I'm using multiple await and populate combo, bcoz single chaining didn't work
+  await ticket.populate("plateNumber", "plateNumber");
+  await ticket.populate("user", "userName");
+  await ticket.populate("gate", "gateName");
+
+  // Include populated items in the resul
+  const {
+    plateNumber: plateNoContainer,
+    user: userContainer,
+    gate: gateContainer,
+    ...result
+  } = ticket.toObject();
+  result.plateNumber = plateNoContainer ? plateNoContainer.plateNumber : null;
+  result.user = userContainer ? userContainer.userName : null;
+  result.gate = gateContainer ? gateContainer.gateName : null;
+
+  // Return response
+  res.status(200).json(result);
+});
 
 // @desc update a ticket
 // @route Update /tickets/:id
 // @access Private
+export const updateTicket = asyncHandler(async (req, res) => {
+  const id = req.params.id;
+  const { exitTime, ticketStatus } = req.body;
+
+  // Validate user data
+  if (!id)
+    return res.status(400).json({ message: "Please provide a valid Id" });
+  if (!exitTime || !ticketStatus)
+    return res.status(400).json({ message: "Please provide required fields" });
+
+  // Check for a match
+  const ticket = await Ticket.findById(id);
+  if (!ticket)
+    return res.send(400).json({ message: "No ticket matches that Id" });
+
+  // Populate Ticket plate No, to display in result
+  await ticket.populate("plateNumber", "plateNumber");
+  const { plateNumber: plateNoContainer, ...result } = ticket.toObject();
+  result.plateNumber = plateNoContainer ? plateNoContainer.plateNumber : null;
+  // Update Vehicle and Return results
+  await Ticket.findByIdAndUpdate(id, {
+    exitTime: exitTime,
+    ticketStatus: ticketStatus,
+  });
+  res
+    .status(201)
+    .json({
+      message: `Ticket ${result._id} with plate number: ${result.plateNumber} was updated succesfully`,
+    });
+});
+
 // @desc delete a ticket
 // @route Delete /tickets/:id
 // @access Private
-// export const getTicket = asyncHandler( async (req, res) => {})
+export const deleteTicket = asyncHandler(async (req, res) => {
+  const id = req.params.id;
+
+  // Validate user data
+  if (!id)
+    return res.status(400).json({ message: "Please provide a valid Id" });
+
+  // Check for a match
+  const ticketToDelete = await Ticket.findById(id);
+  if (!ticketToDelete)
+    return res.status(400).json({ message: "Ticket does not exits" });
+
+  // Delete ticket
+  await Ticket.findByIdAndRemove(id);
+  //Send response
+  res.status(201).json({
+    message: `${ticketToDelete} was deleted succesfully`,
+  });
+});
