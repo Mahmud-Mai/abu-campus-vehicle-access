@@ -1,4 +1,5 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import axios from 'axios';
 
 const initialState = [
   {
@@ -9,31 +10,29 @@ const initialState = [
     date: '10/06/2023',
     time: '10:22:03',
   },
-  {
-    ticketId: 'p6mdfI44AuIhGDZaansc4',
-    plateNumber: 'DEC-123DC',
-    userId: 2,
-    gateId: '2',
-    date: '10/06/2023',
-    time: '11:51:29',
-  },
-  {
-    ticketId: 'BXvA0bgWqwvMicHX5eeTA',
-    plateNumber: 'ADE-012AD',
-    userId: 0,
-    gateId: '3',
-    date: '10/06/2023',
-    time: '11:51:46',
-  },
-  {
-    ticketId: '08Gdp3_n1dp-hzucGcku-',
-    plateNumber: 'AEF-345AE',
-    userId: 1,
-    gateId: '4',
-    date: '10/06/2023',
-    time: '11:51:58',
-  },
 ];
+
+// const initialState = {
+//   tickets: [],
+//   status: 'idle',
+//   error: null,
+//   isLoading: true,
+// };
+
+const url = 'http://localhost:5001/api/v1/tickets';
+
+export const getTicketsList = createAsyncThunk(
+  'ticket/getTicketsList',
+  async thunkAPI => {
+    try {
+      const resp = await axios(url);
+      console.log(`🚀 ~ getTicketsList ~ resp:`, resp);
+      return resp;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
 
 export const ticketsSlice = createSlice({
   name: 'tickets',
@@ -57,9 +56,24 @@ export const ticketsSlice = createSlice({
       },
     },
   },
+  extraReducers: {
+    [getTicketsList.pending]: state => {
+      state.isLoading = true;
+    },
+    [getTicketsList.fulfilled]: (state, action) => {
+      state.isLoading = false;
+      state.tickets = action.payload;
+    },
+    [getTicketsList.rejected]: state => {
+      state.isLoading = false;
+    },
+  },
 });
 
 export const selectAllTickets = state => state.tickets;
+export const getTicketById = (state, ticketId) =>
+  state.tickets.tickets.find(ticket => ticket.id === ticketId);
+
 export default ticketsSlice.reducer;
 export const { ticketAdded } = ticketsSlice.actions;
 // export const { someAction1, someAction1 } = ticketSlice.actions
