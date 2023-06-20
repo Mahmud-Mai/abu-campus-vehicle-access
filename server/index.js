@@ -42,7 +42,7 @@ app.use("/api/v1/vehicles", vehicleRoutes);
 app.use("*", notFoundRoute);
 
 // START SERVER & CONNECT TO DB
-const port = process.env.PORT || 5001;
+const port = process.env.PORT || 5005;
 
 // ERROR HANDLER MIDDLEWARE: TO BE IMPORTED AT END(JUST BEFORE APP STARTS TO LISTEN)
 // app.use(errorHandler());
