@@ -1,35 +1,25 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-const initialState = [
-  {
-    ticketId: '8pPV5Owt4DOo26xEIpZGe',
-    plateNumber: 'ABC-123AA',
-    userId: 0,
-    gateId: 0,
-    date: '10/06/2023',
-    time: '10:22:03',
-  },
-];
+// const initialState = [];
 
-// const initialState = {
-//   tickets: [],
-//   status: 'idle',
-//   error: null,
-//   isLoading: true,
-// };
+const initialState = {
+  tickets: [],
+  status: 'idle', // 'loadding' | 'success' | 'failed'
+  error: null,
+};
 
 const url = 'http://localhost:5001/api/v1/tickets';
 
-export const getTicketsList = createAsyncThunk(
-  'ticket/getTicketsList',
-  async thunkAPI => {
+export const fetchTickets = createAsyncThunk(
+  'ticket/fetchTickets',
+  async () => {
     try {
-      const resp = await axios(url);
-      console.log(`🚀 ~ getTicketsList ~ resp:`, resp);
-      return resp;
+      const response = await axios.get(url);
+      console.log(`🚀 ~ fetchTickets ~ response.data:`, response.data);
+      return [...response.data];
     } catch (error) {
-      return thunkAPI.rejectWithValue(error);
+      return error.message;
     }
   }
 );
@@ -57,20 +47,23 @@ export const ticketsSlice = createSlice({
     },
   },
   extraReducers: {
-    [getTicketsList.pending]: state => {
-      state.isLoading = true;
+    [fetchTickets.pending]: state => {
+      state.status = 'loading';
     },
-    [getTicketsList.fulfilled]: (state, action) => {
-      state.isLoading = false;
+    [fetchTickets.fulfilled]: (state, action) => {
+      state.status = 'success';
       state.tickets = action.payload;
     },
-    [getTicketsList.rejected]: state => {
-      state.isLoading = false;
+    [fetchTickets.rejected]: (state, action) => {
+      state.status = 'failed';
+      state.error = action.error.message;
     },
   },
 });
 
-export const selectAllTickets = state => state.tickets;
+export const fetchAllTickets = state => state.tickets;
+export const getTicketsStatus = state => state.tickets.status;
+export const getTicketsError = state => state.tickets.error;
 export const getTicketById = (state, ticketId) =>
   state.tickets.tickets.find(ticket => ticket.id === ticketId);
 

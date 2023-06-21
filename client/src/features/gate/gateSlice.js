@@ -1,29 +1,40 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import axios from 'axios';
 
-const initialState = [
-  {
-    gateId: 0,
-    gateName: 'Main Gate',
-  },
-  {
-    gateId: 2,
-    gateName: 'North Gate',
-  },
-  {
-    gateId: 3,
-    gateName: 'Police Gate',
-  },
-  {
-    gateId: 4,
-    gateName: 'Nuga Gate',
-  },
-];
+const initialState = {
+  gates: [],
+  status: 'idle',
+};
+
+const url = 'http://localhost:5001/api/v1/gates';
+
+export const fetchGates = createAsyncThunk('gates/fetchGates', async () => {
+  try {
+    const response = await axios.get(url);
+    return [...response.data];
+  } catch (error) {
+    return error.message;
+  }
+});
 
 export const gatesSlice = createSlice({
   name: 'gates',
   initialState,
   reducers: {},
+  extraReducers: {
+    [fetchGates.pending]: state => {
+      state.status = 'loading';
+    },
+    [fetchGates.fulfilled]: (state, action) => {
+      state.status = 'success';
+      state.gates = action.payload;
+    },
+    [fetchGates.rejected]: state => {
+      state.status = 'failed';
+    },
+  },
 });
 
 export default gatesSlice.reducer;
-export const selectAllGates = state => state.gates;
+export const fetchAllGates = state => state.gates.gates;
+export const fetchTGatesStatus = state => state.gates.status;

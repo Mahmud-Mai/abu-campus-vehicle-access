@@ -1,28 +1,33 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Box, Button, Flex, Select, Text } from '@chakra-ui/react';
-import CamComponent from '../../components/CamComponent'; // component to provide camera to UI
-import CardComponent from '../../components/CardComponent';
+import { Box, Flex, Select } from '@chakra-ui/react';
 import { createWorker } from 'tesseract.js';
 import { randomPlateNos } from '../../common/Constants'; // personally curated list of dummy plate Nos
 import { videoConstraints } from '../../common/Constants'; // for webcam config
 import { useDispatch, useSelector } from 'react-redux';
 import {
   ticketAdded,
-  selectAllTickets,
+  // fetchAllTickets,
 } from '../../features/ticket/ticketsSlice';
-import { selectAllGates } from '../../features/gate/gateSlice';
+import {
+  fetchGates,
+  fetchTGatesStatus,
+  fetchAllGates,
+} from '../../features/gate/gateSlice';
 import { nanoid } from '@reduxjs/toolkit';
 import { selectAllUsers } from '../../features/users/userSlice';
 import PageHeading from '../../components/PageHeading';
 import TicketToBePrinted from './TicktetToBePrinted';
+import SnapPlateNumber from './SnapPlateNumber';
+import PreviewPlateNumber from './PreviewPlateNumber';
 
 const worker = await createWorker(); // needed by tesseract
 
 const CheckIn = () => {
-  const gates = useSelector(selectAllGates);
+  const gates = useSelector(fetchAllGates);
+  const gateStatus = useSelector(fetchTGatesStatus);
   const allUser = useSelector(selectAllUsers);
   const userId = allUser[0].userId;
-  const [gateId, setGateId] = useState(gates.length > 0 ? gates[0].gateId : '');
+  const [gateName, setGateName] = useState(null);
   const [ticketId, setTicketId] = useState('');
   const dispatch = useDispatch();
 
@@ -33,10 +38,13 @@ const CheckIn = () => {
   const webcamRef = useRef(null);
 
   // Fetch the missing data to populate ticket
-  const allTickets = useSelector(selectAllTickets);
-  const ticket = allTickets.find(ticket => ticket.ticketId === ticketId);
-  const user = allUser.find(user => user.userId === userId);
-  const gate = gates.find(gate => gate.gateId === Number(gateId));
+  // const allTickets = useSelector(fetchAllTickets);
+  // const gatesList = useSelector(fetchAllGates);
+
+  const ticket = null;
+  // const ticket = allTickets.find(ticket => ticket.ticketId === ticketId)
+
+  const user = allUser.find(user => user.userId === userId || null);
 
   // Take picture
   const capture = useCallback(() => {
@@ -63,6 +71,12 @@ const CheckIn = () => {
     }
   }, [plateNumberImage]);
 
+  // Define function to check for Nigerian plate Number formats
+  const validatePlateNumber = testSubject => {
+    const regex = /^[A-Z]{3}-[0-9]{3}[A-Z]{2}$/;
+    return regex.test(testSubject);
+  };
+
   // Choose a random Dummy Plate Number from a curated list
   const generateRandomPlateNumber = () => {
     const plateNumber =
@@ -76,15 +90,10 @@ const CheckIn = () => {
     doOCR(plateNumberImage);
   }, [doOCR, plateNumberImage]);
 
-  // Check if Input Matches a Plate Number Format
+  // Run the validatePlateNumber function defined above
   useEffect(() => {
     setIsPlateNumberValid(validatePlateNumber(plateNumber));
   }, [isPlateNumberValid, plateNumber]);
-
-  const validatePlateNumber = testSubject => {
-    const regex = /^[A-Z]{3}-[0-9]{3}[A-Z]{2}$/;
-    return regex.test(testSubject);
-  };
 
   const onGenerateTicketClicked = () => {
     // Check if plateNumber is defined
@@ -97,11 +106,16 @@ const CheckIn = () => {
       setIsTicketGenerated(true);
 
       // Dispatch the ticketAdded action creator
-      dispatch(ticketAdded(ticketId, plateNumber, userId, gateId));
+      dispatch(ticketAdded(ticketId, plateNumber, userId, gateName));
     }
     setPlateNumberImage('');
     // setIsTicketGenerated(false)
   };
+
+  // Fetch gates list on page load
+  useEffect(() => {
+    gateStatus === 'idle' && dispatch(fetchGates());
+  }, [dispatch, gateStatus]);
 
   // This step is to ensure CardComponent becomes reusable
   const btnArray = [
@@ -117,98 +131,64 @@ const CheckIn = () => {
     },
   ];
 
-  const availableGates = gates.map(({ gateId, gateName }) => (
-    <option key={gateId} value={gateId}>
+  const availableGates = gates.map(({ _id, gateName }) => (
+    <option key={_id} value={gateName}>
       {gateName}
     </option>
   ));
 
+  // Decide on UI to display
+  let content;
+  if (isTicketGenerated) {
+    content = (
+      <TicketToBePrinted
+        ticketId={ticketId}
+        ticket={ticket}
+        gate={gateName}
+        user={user}
+      />
+    );
+  } else if (plateNumberImage) {
+    content = (
+      <PreviewPlateNumber
+        btnArray={btnArray}
+        plateNumber={plateNumber}
+        isPlateNumberValid={isPlateNumberValid}
+        plateNumberImage={plateNumberImage}
+        generateRandomPlateNumber={generateRandomPlateNumber}
+      >
+        {/* Options to choose Entry gates  */}
+        <Box>
+          <label htmlFor="selectGate"></label>
+          <Select
+            id="selectGate"
+            value={gateName}
+            placeholder="Select gate"
+            onChange={e => setGateName(e.target.value)}
+          >
+            {availableGates}
+          </Select>
+        </Box>
+      </PreviewPlateNumber>
+    );
+  } else {
+    content = (
+      <SnapPlateNumber
+        capture={capture}
+        videoConstraints={videoConstraints}
+        webcamRef={webcamRef}
+      />
+    );
+  }
+
   return (
-    <Box height={'100vh'}>
+    <Box maxHeight={'100vh'}>
       <PageHeading
         title={'Vehicle Check-In'}
         subTitle={'Scan Vehicle Plate Numbers and Print their Gate Pass'}
       />
       {/* Page Body to Display 3 UIs: 1) Snap plate no, 2) Ticket Builder/Previewer, 3) Print Ticket  */}
-      <Box height={'85vh'}>
-        {isTicketGenerated ? (
-          /* If isTicketGenerated is True: Display Ticket to be printed: UI 3 */
-          <Box>
-            <TicketToBePrinted
-              ticketId={ticketId}
-              ticket={ticket}
-              gate={gate}
-              user={user}
-            />
-          </Box>
-        ) : (
-          <Box>
-            {plateNumberImage === '' ? (
-              // If plateNumberImage is empty: Show Video-Camera Component: UI 1
-              <Box>
-                <CardComponent title={'SNAP PLATE NUMBER'}>
-                  <CamComponent
-                    webcamRef={webcamRef}
-                    videoConstraints={videoConstraints}
-                  />
-                  <Button onClick={capture}>Capture</Button>
-                </CardComponent>
-              </Box>
-            ) : (
-              // If plateNumberImage is not empty: Show Preview Component
-              <Box>
-                <CardComponent title={'PREVIEW PLATE NUMBER'} props={btnArray}>
-                  <Box>
-                    {/* Conditionally display either the plateNumberImage Or an empty Box */}
-                    {plateNumberImage ? (
-                      <img
-                        sx={{ width: '250px', height: '300px' }}
-                        src={plateNumberImage}
-                        alt="plate number img"
-                      />
-                    ) : (
-                      <Flex
-                        sx={{
-                          width: '500px',
-                          height: '300px',
-                          border: '2px solid #f3f3f3',
-                        }}
-                        mx="auto"
-                        align="center"
-                        justify="center"
-                      >
-                        PLEASE SNAP A PLATE NUMBER!!
-                      </Flex>
-                    )}
-                  </Box>
-                  {/* Text box to display the recognized characters from the picture provided   */}
-                  <Text m={3}>
-                    {isPlateNumberValid
-                      ? `Recognized Plate Number: ${plateNumber}`
-                      : `Valid Nigerian Plate Number not detected`}
-                  </Text>
-                  {/* Options to choose Entry gates  */}
-                  <Box>
-                    <label htmlFor="selectGate"></label>
-                    <Select
-                      id="selectGate"
-                      value={gateId}
-                      placeholder="Select gate"
-                      onChange={e => setGateId(e.target.value)}
-                    >
-                      {availableGates}
-                    </Select>
-                  </Box>
-                  {/* Button To generate a dummy plate number for demonstration */}
-                  <Button mt={3} onClick={generateRandomPlateNumber}>
-                    Generate Random Plate Number
-                  </Button>
-                </CardComponent>
-              </Box>
-            )}
-          </Box>
-        )}
-      </Box>
+      <Box height={'80vh'}>{content}</Box>
     </Box>
   );
 };

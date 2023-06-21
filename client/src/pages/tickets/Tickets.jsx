@@ -1,40 +1,62 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import DataTable from '../../components/DataTable';
-import { useSelector } from 'react-redux';
-import { selectAllTickets } from '../../features/ticket/ticketsSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  fetchTickets,
+  // getTicketsError,
+  getTicketsStatus,
+  fetchAllTickets,
+} from '../../features/ticket/ticketsSlice';
 import PageHeading from '../../components/PageHeading';
-import { selectAllUsers } from '../../features/users/userSlice';
-import { selectAllGates } from '../../features/gate/gateSlice';
-import { Flex } from '@chakra-ui/react';
+import { Flex, Spinner, Text } from '@chakra-ui/react';
 
 const Tickets = () => {
-  const allAppOperators = useSelector(selectAllUsers);
-  const allGates = useSelector(selectAllGates);
-  const parkingTicketsArray = useSelector(selectAllTickets);
+  const dispatch = useDispatch();
 
-  const rowData = parkingTicketsArray.map(
-    ({ ticketId, plateNumber, userId, gateId, date, time }) => ({
-      'Ticket Id': ticketId,
-      'Plate Numbers': plateNumber,
-      'Entry Gate': allGates
-        .filter(gate => gate.gateId === Number(gateId))
-        .map(data => data.gateName),
-      Time: time,
-      Date: date,
-      'Personnel InCharge': allAppOperators
-        .filter(user => user.userId === userId)
-        .map(data => data.userName),
+  const ticketsList = useSelector(fetchAllTickets);
+  const ticketsStatus = useSelector(getTicketsStatus);
+  // const ticketsError = useSelector(getTicketsError);
+
+  const rowData = ticketsList.tickets.map(
+    ({ _id, plateNumber, user, gate, ticketStatus }) => ({
+      'Ticket Id': _id || null,
+      'Plate Number': plateNumber || null,
+      'Entry Gate': gate,
+      PassageType: ticketStatus,
+      'Personnel InCharge': user,
     })
   );
 
   const columnDefs = [
     { field: 'Ticket Id' },
-    { field: 'Plate Numbers', filter: true },
+    { field: 'Plate Number', filter: true },
     { field: 'Entry Gate', filter: true },
-    { field: 'Time' },
-    { field: 'Date', filter: true },
+    { field: 'PassageType' },
     { field: 'Personnel InCharge', filter: true },
   ];
+
+  useEffect(() => {
+    // fetch tickets only if ticketsStatus is 'idle'
+    ticketsStatus === 'idle' && dispatch(fetchTickets());
+  }, [dispatch, ticketsStatus]);
+
+  // Decide content to display
+  let content;
+  if (ticketsStatus === 'loading') {
+    content = (
+      <Spinner
+        thickness="4px"
+        speed="0.65s"
+        emptyColor="gray.200"
+        color="blue.500"
+        size="xl"
+      />
+    );
+  } else if (ticketsStatus === 'success') {
+    content = <DataTable rowData={rowData} columnDefs={columnDefs} />;
+  } else if (ticketsStatus === 'failed') {
+    content = <Text>Could not fetch Tickets from the Backend</Text>;
+  }
 
   return (
     <>
@@ -43,7 +65,7 @@ const Tickets = () => {
         subTitle={'View all tickets information'}
       />
       <Flex mx={'auto'} justify={'center'}>
-        <DataTable rowData={rowData} columnDefs={columnDefs} />
+        {content}
       </Flex>
     </>
   );
