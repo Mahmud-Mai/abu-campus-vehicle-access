@@ -60,11 +60,13 @@ export const getVehicle = asyncHandler(async (req, res) => {
 // @route GET /vehicles/:plateNumber
 // @access Private
 export const getVehicleByPlateNumber = asyncHandler(async (req, res) => {
-  const { plateNumber } = req.body;
+  const { plateNumber } = req.query;
 
   // Validate user data
   if (!plateNumber)
-    return res.status(400).json({ message: "Please provide required details" });
+    return res
+      .status(400)
+      .json({ message: "You need to pass a plate number as a query string" });
 
   // Check for match
   const vehicle = await Vehicle.findOne({ plateNumber: plateNumber });
@@ -90,6 +92,32 @@ export const getVehicleByPlateNumber = asyncHandler(async (req, res) => {
 // @access Private
 export const createVehice = asyncHandler(async (req, res) => {
   const { plateNumber } = req.body;
+
+  // Validate user data
+  if (!plateNumber)
+    return res.status(400).json({ message: "plateNumber was not provided" });
+
+  // Check for a duplicate
+  const duplicate = await Vehicle.findOne({ plateNumber }).lean();
+  if (duplicate)
+    return res.status(409).json({
+      message: "Duplicates not allowed. plateNumber is already in Use",
+    });
+
+  // Create Vehicle
+  const newVehicle = await Vehicle.create({ plateNumber });
+
+  // Return results
+  res.status(201).json({
+    message: `Vehicle with plate Number: ${newVehicle.plateNumber} created successfully`,
+  });
+});
+
+// @desc Create a vehicle
+// @route Post /vehicles
+// @access Private
+export const createVehiceByPlateNumber = asyncHandler(async (req, res) => {
+  const { plateNumber } = req.query;
 
   // Validate user data
   if (!plateNumber)

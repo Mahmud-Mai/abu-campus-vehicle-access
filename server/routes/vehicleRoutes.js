@@ -10,7 +10,10 @@ import {
 
 const router = express.Router();
 
-router.route("/").get(getAllVehicles).post(createVehice);
-router.route("/by-plate-number").get(getVehicleByPlateNumber);
+router.route("/").get(getAllVehicles);
+router
+  .route("/by-plate-number")
+  .get(getVehicleByPlateNumber)
+  .post(createVehice);
 router.route("/:id").get(getVehicle).patch(updateVehicle).delete(deleteVehicle);
 export default router;
