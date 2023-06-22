@@ -29,7 +29,7 @@ export const getAllVehicles = asyncHandler(async (req, res) => {
   res.status(200).json(vehiclesWithPopulatedStatuses);
 });
 
-// @desc Get a Specific vehicle
+// @desc Get a Specific vehicle by ID
 // @route GET /vehicles/:id
 // @access Private
 export const getVehicle = asyncHandler(async (req, res) => {
@@ -43,6 +43,35 @@ export const getVehicle = asyncHandler(async (req, res) => {
   const vehicle = await Vehicle.findById(id);
   if (!vehicle)
     return res.status(400).json({ message: "No vehicle matches that Id" });
+
+  // Populate blacklistStatus from the associated blacklist document
+  await vehicle.populate("blacklistStatus", "status");
+
+  // Include the blacklist status in the result
+  const { blacklistStatus: blacklistedItem, ...result } = vehicle.toObject();
+
+  result.blacklistStatus = blacklistedItem ? blacklistedItem.status : null;
+
+  // Return results
+  res.status(200).json(result);
+});
+
+// @desc Get a vehicle by plate number
+// @route GET /vehicles/:plateNumber
+// @access Private
+export const getVehicleByPlateNumber = asyncHandler(async (req, res) => {
+  const { plateNumber } = req.body;
+
+  // Validate user data
+  if (!plateNumber)
+    return res.status(400).json({ message: "Please provide required details" });
+
+  // Check for match
+  const vehicle = await Vehicle.findOne({ plateNumber: plateNumber });
+  if (!vehicle)
+    return res
+      .status(400)
+      .json({ message: "No vehicle matches that plate number" });
 
   // Populate blacklistStatus from the associated blacklist document
   await vehicle.populate("blacklistStatus", "status");
