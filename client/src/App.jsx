@@ -3,18 +3,19 @@ import { ChakraProvider, Box, Grid, theme } from '@chakra-ui/react';
 import { ColorModeSwitcher } from './chakra-ui/ColorModeSwitcher';
 import Layout from './pages/layout/Layout';
 import RouterError from './pages/error/RouteError';
-import Dashboard from './pages/dashboard/Dashboard';
-import CheckIn from './pages/checkIn/CheckIn';
-import CheckOut from './pages/checkOut/CheckOut';
-import Tickets from './pages/tickets/Tickets';
-import UserProfile from './pages/userProfile/UserProfile';
+import Dashboard from './pages/dashboard';
+import CheckIn from './pages/checkIn';
+import CheckOut from './pages/checkOut';
+import Tickets from './pages/tickets';
+import UserProfile from './pages/userProfile';
 import { Route, Routes } from 'react-router-dom';
+import Vehicles from './pages/vehicles';
 
 function App() {
   return (
     <ChakraProvider theme={theme}>
       <Box textAlign="center" fontSize="xl">
-        <Grid minH="100vh" p={3}>
+        <Grid height="100vh" p={3}>
           <ColorModeSwitcher justifySelf="flex-end" />
           <Routes>
             <Route path="/" element={<Layout />}>
@@ -25,6 +26,7 @@ function App() {
                 <Route path="/check-out" element={<CheckOut />} />
                 <Route path="/tickets" element={<Tickets />} />
                 <Route path="/account" element={<UserProfile />} />
+                <Route path="/vehicles" element={<Vehicles />} />
               </Route>
             </Route>
           </Routes>

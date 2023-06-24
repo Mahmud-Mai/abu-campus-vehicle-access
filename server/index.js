@@ -42,14 +42,14 @@ app.use("/api/v1/vehicles", vehicleRoutes);
 app.use("*", notFoundRoute);
 
 // START SERVER & CONNECT TO DB
-const port = process.env.PORT || 5005;
+const PORT = process.env.PORT || 3001;
 
 // ERROR HANDLER MIDDLEWARE: TO BE IMPORTED AT END(JUST BEFORE APP STARTS TO LISTEN)
 // app.use(errorHandler());
 
 mongoose.connection.once("open", () => {
   console.log("Connected to MongoDB succesfully");
-  app.listen(port, () => console.log(`Server started on port ${port}`));
+  app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
 });
 
 mongoose.connection.on("error", (err) => {

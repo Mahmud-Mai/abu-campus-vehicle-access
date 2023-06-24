@@ -3,6 +3,7 @@ import { MdDashboard } from 'react-icons/md';
 import { BiCheckShield } from 'react-icons/bi';
 import { BiReceipt } from 'react-icons/bi';
 import { VscAccount } from 'react-icons/vsc';
+import { AiFillCar } from 'react-icons/ai';
 
 export const navItems = [
   {
@@ -21,9 +22,14 @@ export const navItems = [
     link: 'check-out',
   },
   {
-    text: 'Tickets',
+    text: 'Tickets List',
     icon: <BiReceipt />,
     link: 'tickets',
+  },
+  {
+    text: 'Vehicles List',
+    icon: <AiFillCar />,
+    link: 'vehicles',
   },
   {
     text: 'User Profile',

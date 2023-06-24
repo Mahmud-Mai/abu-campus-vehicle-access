@@ -5,6 +5,7 @@ import axios from 'axios';
 
 const initialState = {
   tickets: [],
+  newlyCreatedTicket: {},
   status: 'idle', // 'loadding' | 'success' | 'failed'
   error: null,
 };
@@ -24,28 +25,23 @@ export const fetchTickets = createAsyncThunk(
   }
 );
 
+export const createTicket = createAsyncThunk(
+  'ticket/createTicket',
+  async ticketObject => {
+    // const { plateNumber, ticketStatus, gate, user } = ticketObject;
+    try {
+      const response = await axios.post(url, ticketObject);
+      return response.data;
+    } catch (error) {
+      return error.message;
+    }
+  }
+);
+
 export const ticketsSlice = createSlice({
   name: 'tickets',
   initialState,
-  reducers: {
-    ticketAdded: {
-      reducer(state, action) {
-        state.push(action.payload);
-      },
-      prepare(ticketId, plateNumber, userId, gateId) {
-        return {
-          payload: {
-            ticketId: ticketId,
-            plateNumber: plateNumber,
-            userId,
-            gateId,
-            date: new Date().toLocaleDateString(),
-            time: new Date().toLocaleTimeString(),
-          },
-        };
-      },
-    },
-  },
+  reducers: {},
   extraReducers: {
     [fetchTickets.pending]: state => {
       state.status = 'loading';
@@ -58,15 +54,25 @@ export const ticketsSlice = createSlice({
       state.status = 'failed';
       state.error = action.error.message;
     },
+    [createTicket.fulfilled]: (state, action) => {
+      const responseError =
+        action.payload === 'Request failed with status code 400' ||
+        action.payload === 'Request failed with status code 500';
+      if (!responseError) {
+        state.status = 'success';
+        state.newlyCreatedTicket = action.payload;
+      }
+    },
   },
 });
 
-export const fetchAllTickets = state => state.tickets;
-export const getTicketsStatus = state => state.tickets.status;
-export const getTicketsError = state => state.tickets.error;
+export const fetchNewlyCreatedTicket = state =>
+  state.tickets.newlyCreatedTicket;
+export const fetchAllTickets = state => state.tickets.tickets;
+export const getTicketsListStatus = state => state.tickets.status;
+export const getTicketsListError = state => state.tickets.error;
 export const getTicketById = (state, ticketId) =>
   state.tickets.tickets.find(ticket => ticket.id === ticketId);
 
 export default ticketsSlice.reducer;
-export const { ticketAdded } = ticketsSlice.actions;
 // export const { someAction1, someAction1 } = ticketSlice.actions
