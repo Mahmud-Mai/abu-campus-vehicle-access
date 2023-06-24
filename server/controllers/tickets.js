@@ -92,8 +92,24 @@ export const createTicket = asyncHandler(async (req, res) => {
     user: userObject._id,
   });
 
-  // Create ticket
-  res.status(201).json(ticket);
+  // Populate plateNumber, user, gate fields, I'm using multiple await and populate combo, bcoz single chaining didn't work
+  await ticket.populate("plateNumber", "plateNumber");
+  await ticket.populate("user", "userName");
+  await ticket.populate("gate", "gateName");
+
+  // Include populated items in the resul
+  const {
+    plateNumber: plateNoContainer,
+    user: userContainer,
+    gate: gateContainer,
+    ...result
+  } = ticket.toObject();
+  result.plateNumber = plateNoContainer ? plateNoContainer.plateNumber : null;
+  result.user = userContainer ? userContainer.userName : null;
+  result.gate = gateContainer ? gateContainer.gateName : null;
+
+  // Return response
+  res.status(200).json(result);
 });
 
 // @desc Get a Specific ticket
@@ -158,11 +174,9 @@ export const updateTicket = asyncHandler(async (req, res) => {
     exitTime: exitTime,
     ticketStatus: ticketStatus,
   });
-  res
-    .status(201)
-    .json({
-      message: `Ticket ${result._id} with plate number: ${result.plateNumber} was updated succesfully`,
-    });
+  res.status(201).json({
+    message: `Ticket ${result._id} with plate number: ${result.plateNumber} was updated succesfully`,
+  });
 });
 
 // @desc delete a ticket

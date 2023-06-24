@@ -28,7 +28,6 @@ export const fetchTickets = createAsyncThunk(
 export const createTicket = createAsyncThunk(
   'ticket/createTicket',
   async ticketObject => {
-    // const { plateNumber, ticketStatus, gate, user } = ticketObject;
     try {
       const response = await axios.post(url, ticketObject);
       return response.data;

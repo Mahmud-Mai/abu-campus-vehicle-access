@@ -1,10 +1,10 @@
 import express from "express";
 import {
-  createTicket,
   deleteTicket,
   getAllTickets,
   getTicket,
   updateTicket,
+  createTicket,
 } from "../controllers/tickets.js";
 
 const router = express.Router();

@@ -134,9 +134,7 @@ export const createVehiceByPlateNumber = asyncHandler(async (req, res) => {
   const newVehicle = await Vehicle.create({ plateNumber });
 
   // Return results
-  res.status(201).json({
-    message: `Vehicle with plate Number: ${newVehicle.plateNumber} created successfully`,
-  });
+  res.status(201).json(newVehicle);
 });
 
 // @desc update a vehicle

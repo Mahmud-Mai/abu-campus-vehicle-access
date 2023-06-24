@@ -7,6 +7,7 @@ const VehicleSchema = new Schema({
     required: true,
   },
   blacklistStatus: { type: Schema.Types.ObjectId, ref: "Blacklist" },
+  // ticketsCollected: [{type: Schema.Types.Id, ref: "Ticket"}],
 });
 
 const Vehicle = new model("Vehicle", VehicleSchema);
