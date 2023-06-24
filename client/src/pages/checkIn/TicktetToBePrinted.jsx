@@ -22,18 +22,22 @@ const TicktetToBePrinted = ({ ticketId, plateNumber }) => {
         </Flex>
         <Flex justify={'space-between'}>
           <Box>Vehicle Plate Number:</Box>
-          <Text> {plateNumber}</Text>
+          <Text> {ticket.plateNumber}</Text>
+        </Flex>
+        <Flex justify={'space-between'}>
+          <Box>Passage Type</Box>
+          <Text> {ticket.ticketStatus}</Text>
         </Flex>
         <Flex justify={'space-between'}>
           <Box>Gate Used:</Box>
           <Text>{ticket.gate}</Text>
         </Flex>
         <Flex justify={'space-between'}>
-          <Box>Date & Time:</Box>
+          <Box>Time:</Box>
           <Text>{ticket.createdAt}</Text>
         </Flex>
         <Flex justify={'space-between'}>
-          <Box>Personnel on Duty:</Box>
+          <Box>Security Personnel:</Box>
           <Text>{ticket.user}</Text>
         </Flex>
         <Flex justify={'center'}>
