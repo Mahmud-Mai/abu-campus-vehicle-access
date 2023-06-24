@@ -2,8 +2,13 @@ import React from 'react';
 import CardComponent from '../../components/CardComponent';
 import { Box, Button, Flex, Stack, StackDivider, Text } from '@chakra-ui/react';
 import QrcodeComponent from '../../components/QrcodeComponent';
+import { useSelector } from 'react-redux';
+import { fetchNewlyCreatedTicket } from '../../features/ticket/ticketsSlice';
 
-const TicktetToBePrinted = ({ ticketId, ticket, gate, user }) => {
+const TicktetToBePrinted = ({ ticketId, plateNumber }) => {
+  const ticket = useSelector(fetchNewlyCreatedTicket);
+  console.log(`🚀 ~ TicktetToBePrinted ~ ticket:`, ticket);
+
   return (
     <CardComponent
       customStyles={{ backgroundColor: 'white', color: 'black' }}
@@ -12,25 +17,27 @@ const TicktetToBePrinted = ({ ticketId, ticket, gate, user }) => {
     >
       <Stack divider={<StackDivider />} width={'24rem'} spacing="5">
         <Flex justify={'space-between'}>
+          <Box>Ticket Id:</Box>
+          <Text> {ticket._id}</Text>
+        </Flex>
+        <Flex justify={'space-between'}>
           <Box>Vehicle Plate Number:</Box>
-          <Text> {ticket.plateNumber}</Text>
+          <Text> {plateNumber}</Text>
         </Flex>
         <Flex justify={'space-between'}>
           <Box>Gate Used:</Box>
-          <Text>{gate.gateName}</Text>
+          <Text>{ticket.gate}</Text>
         </Flex>
         <Flex justify={'space-between'}>
           <Box>Date & Time:</Box>
-          <Text>
-            {ticket.time} | {ticket.date}
-          </Text>
+          <Text>{ticket.createdAt}</Text>
         </Flex>
         <Flex justify={'space-between'}>
           <Box>Personnel on Duty:</Box>
-          <Text>{user.userName}</Text>
+          <Text>{ticket.user}</Text>
         </Flex>
         <Flex justify={'center'}>
-          <QrcodeComponent ticketId={ticketId} />
+          <QrcodeComponent ticketId={ticket._id} />
         </Flex>
       </Stack>
       <Button onClick={e => window.print()} colorScheme="teal" mt={4}>
