@@ -7,13 +7,14 @@ const initialState = {
   error: null,
 };
 
-const url = 'http://localhost:5001/api/v1/vehicles/by-plate-number';
+const baseUrl = process.env.BASE_URL;
+const url = `${baseUrl}/vehicles`;
 
 export const fetchVehicles = createAsyncThunk(
   'vehicle/fetchVehicles',
   async () => {
     try {
-      const response = await axios.get(url);
+      const response = await axios.get(`${url}/by-plate-number`);
       console.log(`🚀 ~ fetchVehicles ~ response:`, response);
       return [...response.data];
     } catch (error) {
@@ -26,7 +27,7 @@ export const fetchVehicleByPlateNumber = createAsyncThunk(
   'vehicles/fetchVehicleByPlateNumber',
   async plateNumber => {
     const response = await axios.get(
-      `http://localhost:5001/api/v1/vehicles/by-plate-number/?plateNumber=${plateNumber}`
+      `${url}/by-plate-number/?plateNumber=${plateNumber}`
     );
 
     return response.data;
@@ -38,7 +39,7 @@ export const createVehicleByPlateNumber = createAsyncThunk(
   async plateNumber => {
     try {
       const response = await axios.post(
-        `http://localhost:5001/api/v1/vehicles/by-plate-number/?plateNumber=${plateNumber}`
+        `${url}/by-plate-number/?plateNumber=${plateNumber}`
       );
       console.log(
         `🚀 ~ createVehicleByPlateNumber ~ response.data:`,

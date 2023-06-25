@@ -6,7 +6,8 @@ const initialState = {
   status: 'idle',
 };
 
-const url = 'http://localhost:5001/api/v1/gates';
+const baseUrl = process.env.BASE_URL;
+const url = `${baseUrl}/gates`;
 
 export const fetchGates = createAsyncThunk('gates/fetchGates', async () => {
   try {

@@ -10,7 +10,8 @@ const initialState = {
   error: null,
 };
 
-const url = 'http://localhost:5001/api/v1/tickets';
+const baseUrl = process.env.BASE_URL;
+const url = `${baseUrl}/tickets`;
 
 export const fetchTickets = createAsyncThunk(
   'ticket/fetchTickets',
