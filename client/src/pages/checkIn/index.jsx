@@ -73,7 +73,7 @@ const CheckIn = () => {
 
   // Define function to check for Nigerian plate Number formats
   const validatePlateNumber = testSubject => {
-    const regex = /^[A-Z]{3}-[0-9]{3}[A-Z]{2}$/;
+    const regex = /^[A-Z]{3}-\d{3}[A-Z]{2}$/;
     return regex.test(testSubject);
   };
 
