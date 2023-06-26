@@ -10,7 +10,7 @@ const initialState = {
   error: null,
 };
 
-const baseUrl = process.env.BASE_URL;
+const baseUrl = process.env.REACT_APP_BASE_URL;
 const url = `${baseUrl}/tickets`;
 
 export const fetchTickets = createAsyncThunk(
