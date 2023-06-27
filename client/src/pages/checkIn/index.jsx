@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Box, Select } from '@chakra-ui/react';
+import { Box, Select, useToast } from '@chakra-ui/react';
 import { createWorker } from 'tesseract.js';
 import { randomPlateNos } from '../../common/Constants'; // personally curated list of dummy plate Nos
 import { videoConstraints } from '../../common/Constants'; // for webcam config
@@ -23,6 +23,7 @@ import {
 const worker = await createWorker(); // needed by tesseract
 
 const CheckIn = () => {
+  const toast = useToast();
   const gates = useSelector(fetchAllGates);
   const gateStatus = useSelector(fetchTGatesStatus);
   const allUser = useSelector(selectAllUsers);
@@ -67,9 +68,20 @@ const CheckIn = () => {
         data: { text },
       } = await worker.recognize(plateNumberImage);
       setPlateNumber(text);
-      console.log('🚀 ~ file: CheckIn.jsx:54 ~ doOCR ~ text:', text);
+      toast({
+        title: 'Account created.',
+        position: 'top',
+        render: () => (
+          <Box color="white" mt={12} p={3} bg="blue.500">
+            Detected text: {text}
+          </Box>
+        ),
+        duration: 7000,
+        isClosable: true,
+      });
+      console.log('🚀 ~ file: CheckIn.jsx:54 ~ doOCR ~ Recognized text:', text);
     }
-  }, [plateNumberImage]);
+  }, [plateNumberImage, toast]);
 
   // Define function to check for Nigerian plate Number formats
   const validatePlateNumber = testSubject => {

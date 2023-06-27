@@ -42,7 +42,7 @@ const PreviewPlateNumber = ({
       <Text m={3}>
         {isPlateNumberValid
           ? `Recognized Plate Number: ${plateNumber}`
-          : `Valid Nigerian Plate Number not detected`}
+          : `Could not detect a Valid Nigerian Plate Number`}
       </Text>
       {/* Other Child Items */}
       {children}
