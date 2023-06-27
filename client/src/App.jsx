@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChakraProvider, Box, Grid, theme } from '@chakra-ui/react';
+import { Box, Grid, theme } from '@chakra-ui/react';
 import { ColorModeSwitcher } from './chakra-ui/ColorModeSwitcher';
 import Layout from './pages/layout/Layout';
 import RouterError from './pages/error/RouteError';
@@ -10,10 +10,11 @@ import Tickets from './pages/tickets';
 import UserProfile from './pages/userProfile';
 import { Route, Routes } from 'react-router-dom';
 import Vehicles from './pages/vehicles';
+import { ChakraUIProvider } from './chakra-ui/chakra-ui.provider';
 
 function App() {
   return (
-    <ChakraProvider theme={theme}>
+    <ChakraUIProvider theme={theme}>
       <Box textAlign="center" fontSize="xl">
         <Grid height="100vh" p={3}>
           <ColorModeSwitcher justifySelf="flex-end" />
@@ -32,7 +33,7 @@ function App() {
           </Routes>
         </Grid>
       </Box>
-    </ChakraProvider>
+    </ChakraUIProvider>
   );
 }
 

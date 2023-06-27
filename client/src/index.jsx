@@ -11,6 +11,7 @@ import App from './App';
 import { store } from './app/store';
 import { Provider } from 'react-redux';
 import RouterError from './pages/error/RouteError';
+import { chakraCustomTheme as theme } from './chakra-ui/chakra-ui.custom-theme';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -24,7 +25,7 @@ const root = ReactDOM.createRoot(container);
 root.render(
   <StrictMode>
     <Provider store={store}>
-      <ColorModeScript />
+      <ColorModeScript initialColorMode={theme.config.initialColorMode} />
       <RouterProvider router={router} />
     </Provider>
   </StrictMode>
