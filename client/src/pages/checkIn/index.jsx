@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Box, Select, Spinner, useToast } from '@chakra-ui/react';
+import { Box, Select, useToast } from '@chakra-ui/react';
 import { createWorker } from 'tesseract.js';
 import { randomPlateNos } from '../../common/Constants'; // personally curated list of dummy plate Nos
 import { videoConstraints } from '../../common/Constants'; // for webcam config
@@ -37,10 +37,6 @@ const CheckIn = () => {
   const [isTicketGenerated, setIsTicketGenerated] = useState(false); // will be used to render Ticket component
   const [isPlateNumberValid, setIsPlateNumberValid] = useState(false); // To display plate number to UI
   const webcamRef = useRef(null);
-
-  // Fetch the missing data to populate ticket
-  // const allTickets = useSelector(fetchAllTickets);
-  // const gatesList = useSelector(fetchAllGates);
 
   const ticket = null;
   // const ticket = allTickets.find(ticket => ticket.ticketId === ticketId)
@@ -107,7 +103,7 @@ const CheckIn = () => {
   }, [isPlateNumberValid, plateNumber]);
 
   const onGenerateTicketClicked = async () => {
-    // Check if plateNumber is proovided, fetch the associated Vehicle Then Create a ticket for the vehicle
+    // Check if plateNumber is provided, fetch the associated Vehicle Then Create a ticket for the vehicle
     if (plateNumber) {
       // Check if vahicle exists and get the id
       let vehicleExists = await dispatch(
@@ -115,7 +111,10 @@ const CheckIn = () => {
       ).unwrap();
 
       // Else create the vehicle and get the Id
-      if (vehicleExists === 'Request failed with status code 400') {
+      if (
+        !vehicleExists ||
+        vehicleExists === 'Request failed with status code 400'
+      ) {
         let newVehicleExist;
         // Create Vehicle
         newVehicleExist = await dispatch(
