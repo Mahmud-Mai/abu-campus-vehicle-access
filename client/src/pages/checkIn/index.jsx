@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Box, Select, useToast } from '@chakra-ui/react';
+import { Box, Select, Spinner, useToast } from '@chakra-ui/react';
 import { createWorker } from 'tesseract.js';
 import { randomPlateNos } from '../../common/Constants'; // personally curated list of dummy plate Nos
 import { videoConstraints } from '../../common/Constants'; // for webcam config
@@ -76,10 +76,9 @@ const CheckIn = () => {
             Detected text: {text}
           </Box>
         ),
-        duration: 7000,
+        duration: 5000,
         isClosable: true,
       });
-      console.log('🚀 ~ file: CheckIn.jsx:54 ~ doOCR ~ Recognized text:', text);
     }
   }, [plateNumberImage, toast]);
 
@@ -162,13 +161,15 @@ const CheckIn = () => {
   ];
 
   const availableGates =
-    typeof gates === 'object'
-      ? gates.map(({ _id, gateName }) => (
-          <option key={_id} value={gateName}>
-            {gateName}
-          </option>
-        ))
-      : undefined;
+    typeof gates === 'object' ? (
+      gates.map(({ _id, gateName }) => (
+        <option key={_id} value={gateName}>
+          {gateName}
+        </option>
+      ))
+    ) : (
+      <option>Loading...</option>
+    );
 
   // Decide on UI to display
   let content;
