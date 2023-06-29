@@ -7,13 +7,10 @@ const initialState = {
 };
 
 const baseUrl = process.env.REACT_APP_BASE_URL;
-console.log(`🚀 ~ REACT_APP_BASE_URL:`, process.env.REACT_APP_BASE_URL);
 const url = `${baseUrl}/gates`;
 
 export const fetchGates = createAsyncThunk('gates/fetchGates', async () => {
   try {
-    console.log(`🚀 ~ url:`, url);
-    console.log(`🚀 ~ baseUrl:`, baseUrl);
     const response = await axios.get(url);
     return [...response.data];
   } catch (error) {
