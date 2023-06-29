@@ -1,20 +1,21 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Box, Select, useToast } from '@chakra-ui/react';
+import { Box, Button, Select, useToast } from '@chakra-ui/react';
 import { createWorker } from 'tesseract.js';
 import { randomPlateNos } from '../../common/Constants'; // personally curated list of dummy plate Nos
 import { videoConstraints } from '../../common/Constants'; // for webcam config
 import { useDispatch, useSelector } from 'react-redux';
+import PageHeading from '../../components/PageHeading';
+import TicketToBePrinted from './TicktetToBePrinted';
+import SnapPlateNumber from './SnapPlateNumber';
+import PreviewPlateNumber from './PreviewPlateNumber';
+import MalayPlate from '../../assets/ABC-471JP.jpg';
+import { selectAllUsers } from '../../features/users/userSlice';
 import { createTicket } from '../../features/ticket/ticketsSlice';
 import {
   fetchGates,
   fetchTGatesStatus,
   fetchAllGates,
 } from '../../features/gate/gateSlice';
-import { selectAllUsers } from '../../features/users/userSlice';
-import PageHeading from '../../components/PageHeading';
-import TicketToBePrinted from './TicktetToBePrinted';
-import SnapPlateNumber from './SnapPlateNumber';
-import PreviewPlateNumber from './PreviewPlateNumber';
 import {
   createVehicleByPlateNumber,
   fetchVehicleByPlateNumber,
@@ -64,6 +65,8 @@ const CheckIn = () => {
         data: { text },
       } = await worker.recognize(plateNumberImage);
       setPlateNumber(text);
+      console.log(`🚀 ~ doOCR ~ text:`, text);
+      console.log(MalayPlate);
       toast({
         title: 'Account created.',
         position: 'top',
@@ -195,6 +198,14 @@ const CheckIn = () => {
             {availableGates}
           </Select>
         </Box>
+        <Button
+          m={5}
+          onClick={() => {
+            setPlateNumberImage(MalayPlate);
+          }}
+        >
+          Use Dummy PlateNumber
+        </Button>
       </PreviewPlateNumber>
     );
   } else {
