@@ -29,11 +29,14 @@ export const fetchTickets = createAsyncThunk(
 export const createTicket = createAsyncThunk(
   'ticket/createTicket',
   async ticketObject => {
+    const stringifiedTicketObject = JSON.stringify(ticketObject);
     try {
-      const response = await axios.post(url, ticketObject);
+      const response = await axios.post('url', stringifiedTicketObject);
+      console.log(`🚀 ~ stringifiedTicketObject:`, stringifiedTicketObject);
+
       return response.data;
     } catch (error) {
-      return error.message;
+      console.log(error.toJSON());
     }
   }
 );
