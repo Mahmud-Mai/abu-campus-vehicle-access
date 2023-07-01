@@ -8,7 +8,7 @@ import PageHeading from '../../components/PageHeading';
 import TicketToBePrinted from './TicktetToBePrinted';
 import SnapPlateNumber from './SnapPlateNumber';
 import PreviewPlateNumber from './PreviewPlateNumber';
-import MalayPlate from '../../assets/ABC-471JP.jpg';
+import MalayPlate from '../../assets/GWA-946GG.jpg';
 import { selectAllUsers } from '../../features/users/userSlice';
 import { createTicket } from '../../features/ticket/ticketsSlice';
 import {
@@ -21,26 +21,22 @@ import {
   fetchVehicleByPlateNumber,
 } from '../../features/vehicle/vehicleSlice';
 
-const worker = await createWorker(); // needed by tesseract
+// const worker = await createWorker(); // needed by tesseract
 
 const CheckIn = () => {
   const toast = useToast();
   const gates = useSelector(fetchAllGates);
   const gateStatus = useSelector(fetchTGatesStatus);
   const allUser = useSelector(selectAllUsers);
-  const userId = allUser[0].userId;
   const dispatch = useDispatch();
+  const userId = allUser[0].userId; // temporarily
 
   const [gateName, setGateName] = useState(null);
-  // const [ticketId, setTicketId] = useState('');
   const [plateNumberImage, setPlateNumberImage] = useState(''); // to be used to call doOCR()
   const [plateNumber, setPlateNumber] = useState(''); // to be used in validatePlateNo() and displayed to UI
   const [isTicketGenerated, setIsTicketGenerated] = useState(false); // will be used to render Ticket component
   const [isPlateNumberValid, setIsPlateNumberValid] = useState(false); // To display plate number to UI
   const webcamRef = useRef(null);
-
-  const ticket = null;
-  // const ticket = allTickets.find(ticket => ticket.ticketId === ticketId)
 
   const user = allUser.find(user => user.userId === userId || null);
 
@@ -57,13 +53,16 @@ const CheckIn = () => {
 
   // Define function to run character recognition on an image
   const doOCR = useCallback(async () => {
+    const worker = await createWorker({
+      logger: m => console.log(m),
+    });
     if (plateNumberImage) {
-      await worker.load();
       await worker.loadLanguage('eng');
       await worker.initialize('eng');
       const {
         data: { text },
       } = await worker.recognize(plateNumberImage);
+      await worker.terminate();
       setPlateNumber(text);
       console.log(`🚀 ~ doOCR ~ text:`, text);
       console.log(MalayPlate);
@@ -176,7 +175,7 @@ const CheckIn = () => {
   // Decide on UI to display
   let content;
   if (isTicketGenerated) {
-    content = <TicketToBePrinted ticket={ticket} gate={gateName} user={user} />;
+    content = <TicketToBePrinted gate={gateName} user={user} />;
   } else if (plateNumberImage) {
     content = (
       <PreviewPlateNumber
@@ -204,7 +203,7 @@ const CheckIn = () => {
             setPlateNumberImage(MalayPlate);
           }}
         >
-          Use Dummy PlateNumber
+          Fetch Dummy PlateNumber Image
         </Button>
       </PreviewPlateNumber>
     );
