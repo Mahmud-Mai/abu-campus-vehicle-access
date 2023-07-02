@@ -1,45 +1,44 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Box, Select, useToast } from '@chakra-ui/react';
+import { Box, Button, Select, useToast } from '@chakra-ui/react';
 import { createWorker } from 'tesseract.js';
 import { randomPlateNos } from '../../common/Constants'; // personally curated list of dummy plate Nos
 import { videoConstraints } from '../../common/Constants'; // for webcam config
 import { useDispatch, useSelector } from 'react-redux';
-import { createTicket } from '../../features/ticket/ticketsSlice';
-import {
-  fetchGates,
-  fetchTGatesStatus,
-  fetchAllGates,
-} from '../../features/gate/gateSlice';
-import { selectAllUsers } from '../../features/users/userSlice';
 import PageHeading from '../../components/PageHeading';
 import TicketToBePrinted from './TicktetToBePrinted';
 import SnapPlateNumber from './SnapPlateNumber';
 import PreviewPlateNumber from './PreviewPlateNumber';
+import MalayPlate from '../../assets/GWA-946GG.jpg';
+import { selectAllUsers } from '../../features/users/userSlice';
+// import { createTicket } from '../../features/ticket/ticketsSlice';
+import { createTicket } from '../../api/tickets';
+
+import {
+  fetchTGatesStatus,
+  fetchAllGates,
+} from '../../features/gate/gateSlice';
+import { fetchGates } from '../../api/gates';
 import {
   createVehicleByPlateNumber,
   fetchVehicleByPlateNumber,
-} from '../../features/vehicle/vehicleSlice';
+} from '../../api/vehicles';
 
-const worker = await createWorker(); // needed by tesseract
+// const worker = await createWorker(); // needed by tesseract
 
 const CheckIn = () => {
   const toast = useToast();
   const gates = useSelector(fetchAllGates);
   const gateStatus = useSelector(fetchTGatesStatus);
   const allUser = useSelector(selectAllUsers);
-  const userId = allUser[0].userId;
   const dispatch = useDispatch();
+  const userId = allUser[0].userId; // temporarily
 
-  const [gateName, setGateName] = useState(null);
-  // const [ticketId, setTicketId] = useState('');
+  const [gateName, setGateName] = useState('');
   const [plateNumberImage, setPlateNumberImage] = useState(''); // to be used to call doOCR()
   const [plateNumber, setPlateNumber] = useState(''); // to be used in validatePlateNo() and displayed to UI
   const [isTicketGenerated, setIsTicketGenerated] = useState(false); // will be used to render Ticket component
   const [isPlateNumberValid, setIsPlateNumberValid] = useState(false); // To display plate number to UI
   const webcamRef = useRef(null);
-
-  const ticket = null;
-  // const ticket = allTickets.find(ticket => ticket.ticketId === ticketId)
 
   const user = allUser.find(user => user.userId === userId || null);
 
@@ -56,14 +55,17 @@ const CheckIn = () => {
 
   // Define function to run character recognition on an image
   const doOCR = useCallback(async () => {
+    const worker = await createWorker();
     if (plateNumberImage) {
-      await worker.load();
       await worker.loadLanguage('eng');
       await worker.initialize('eng');
       const {
         data: { text },
       } = await worker.recognize(plateNumberImage);
+      await worker.terminate();
       setPlateNumber(text);
+      console.log(`🚀 ~ doOCR ~ text:`, text);
+      console.log(MalayPlate);
       toast({
         title: 'Account created.',
         position: 'top',
@@ -124,6 +126,10 @@ const CheckIn = () => {
 
         return vehicleExists;
       }
+      console.log(
+        `🚀 ~ onGenerateTicketClicked ~ vehicleExists:`,
+        vehicleExists
+      );
 
       // Dispatch the generateTicket action creator
       const ticketObject = {
@@ -133,6 +139,7 @@ const CheckIn = () => {
         user: user.userName,
       };
       dispatch(createTicket(ticketObject));
+      console.log(`🚀 ~ onGenerateTicketClicked ~ ticketObject:`, ticketObject);
     }
 
     // setIsTicketGenerated(false)
@@ -173,7 +180,7 @@ const CheckIn = () => {
   // Decide on UI to display
   let content;
   if (isTicketGenerated) {
-    content = <TicketToBePrinted ticket={ticket} gate={gateName} user={user} />;
+    content = <TicketToBePrinted gate={gateName} user={user} />;
   } else if (plateNumberImage) {
     content = (
       <PreviewPlateNumber
@@ -195,6 +202,14 @@ const CheckIn = () => {
             {availableGates}
           </Select>
         </Box>
+        <Button
+          m={5}
+          onClick={() => {
+            setPlateNumberImage(MalayPlate);
+          }}
+        >
+          Fetch Dummy PlateNumber Image
+        </Button>
       </PreviewPlateNumber>
     );
   } else {

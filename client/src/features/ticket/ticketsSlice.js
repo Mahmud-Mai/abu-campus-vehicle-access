@@ -1,7 +1,5 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import axios from 'axios';
-
-// const initialState = [];
+import { createSlice } from '@reduxjs/toolkit';
+import { createTicket, fetchTickets } from '../../api/tickets';
 
 const initialState = {
   tickets: [],
@@ -9,34 +7,6 @@ const initialState = {
   status: 'idle', // 'loadding' | 'success' | 'failed'
   error: null,
 };
-
-const baseUrl = process.env.REACT_APP_BASE_URL;
-const url = `${baseUrl}/tickets`;
-
-export const fetchTickets = createAsyncThunk(
-  'ticket/fetchTickets',
-  async () => {
-    try {
-      const response = await axios.get(url);
-      console.log(`🚀 ~ fetchTickets ~ response.data:`, response.data);
-      return [...response.data];
-    } catch (error) {
-      return error.message;
-    }
-  }
-);
-
-export const createTicket = createAsyncThunk(
-  'ticket/createTicket',
-  async ticketObject => {
-    try {
-      const response = await axios.post(url, ticketObject);
-      return response.data;
-    } catch (error) {
-      return error.message;
-    }
-  }
-);
 
 export const ticketsSlice = createSlice({
   name: 'tickets',

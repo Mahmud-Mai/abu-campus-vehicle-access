@@ -2,13 +2,12 @@ import React, { useEffect } from 'react';
 import DataTable from '../../components/DataTable';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  fetchTickets,
-  // getTicketsListError,
   getTicketsListStatus,
   fetchAllTickets,
 } from '../../features/ticket/ticketsSlice';
 import PageHeading from '../../components/PageHeading';
 import { Flex } from '@chakra-ui/react';
+import { fetchTickets } from '../../api/tickets';
 
 const Tickets = () => {
   const dispatch = useDispatch();

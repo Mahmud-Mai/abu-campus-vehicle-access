@@ -1,6 +1,14 @@
 import React from 'react';
 import CardComponent from '../../components/CardComponent';
-import { Box, Button, Flex, Stack, StackDivider, Text } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Flex,
+  Spinner,
+  Stack,
+  StackDivider,
+  Text,
+} from '@chakra-ui/react';
 import QrcodeComponent from '../../components/QrcodeComponent';
 import { useSelector } from 'react-redux';
 import { fetchNewlyCreatedTicket } from '../../features/ticket/ticketsSlice';
@@ -9,12 +17,9 @@ const TicktetToBePrinted = ({ ticketId, plateNumber }) => {
   const ticket = useSelector(fetchNewlyCreatedTicket);
   console.log(`🚀 ~ TicktetToBePrinted ~ ticket:`, ticket);
 
-  return (
-    <CardComponent
-      customStyles={{ backgroundColor: 'white', color: 'black' }}
-      colorScheme="teal"
-      title={'ABU VEHICLE GATE PASS'}
-    >
+  let content;
+  if (ticket) {
+    content = (
       <Stack divider={<StackDivider />} width={'24rem'} spacing="5">
         <Flex justify={'space-between'}>
           <Box>Ticket Id:</Box>
@@ -44,6 +49,28 @@ const TicktetToBePrinted = ({ ticketId, plateNumber }) => {
           <QrcodeComponent ticketId={ticket._id} />
         </Flex>
       </Stack>
+    );
+  } else {
+    content = (
+      <Flex align={'center'} height={200}>
+        <Spinner
+          thickness="4px"
+          speed="0.65s"
+          emptyColor="gray.200"
+          color="blue.500"
+          size="xl"
+        />
+      </Flex>
+    );
+  }
+
+  return (
+    <CardComponent
+      customStyles={{ backgroundColor: 'white', color: 'black' }}
+      colorScheme="teal"
+      title={'ABU VEHICLE GATE PASS'}
+    >
+      {content}
       <Button onClick={e => window.print()} colorScheme="teal" mt={4}>
         Print Ticket
       </Button>

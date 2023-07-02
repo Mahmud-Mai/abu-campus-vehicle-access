@@ -4,15 +4,16 @@ import { useDispatch, useSelector } from 'react-redux';
 import PageHeading from '../../components/PageHeading';
 import { Flex } from '@chakra-ui/react';
 import {
-  fetchVehicles,
   fetchAllVehicles,
   vehicleListStatus,
 } from '../../features/vehicle/vehicleSlice';
+import { fetchVehicles } from '../../api/vehicles';
 
 const Vehicles = () => {
   const dispatch = useDispatch();
 
   const vehiclesList = useSelector(fetchAllVehicles);
+  console.log(`🚀 ~ Vehicles ~ typeof vehiclesList:`, typeof vehiclesList);
   const vehiclesListStatus = useSelector(vehicleListStatus);
 
   const rowData = vehiclesList.map(({ _id, plateNumber }) => ({
