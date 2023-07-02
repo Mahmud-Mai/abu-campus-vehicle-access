@@ -10,16 +10,18 @@ import SnapPlateNumber from './SnapPlateNumber';
 import PreviewPlateNumber from './PreviewPlateNumber';
 import MalayPlate from '../../assets/GWA-946GG.jpg';
 import { selectAllUsers } from '../../features/users/userSlice';
-import { createTicket } from '../../features/ticket/ticketsSlice';
+// import { createTicket } from '../../features/ticket/ticketsSlice';
+import { createTicket } from '../../api/tickets';
+
 import {
-  fetchGates,
   fetchTGatesStatus,
   fetchAllGates,
 } from '../../features/gate/gateSlice';
+import { fetchGates } from '../../api/gates';
 import {
   createVehicleByPlateNumber,
   fetchVehicleByPlateNumber,
-} from '../../features/vehicle/vehicleSlice';
+} from '../../api/vehicles';
 
 // const worker = await createWorker(); // needed by tesseract
 
@@ -31,7 +33,7 @@ const CheckIn = () => {
   const dispatch = useDispatch();
   const userId = allUser[0].userId; // temporarily
 
-  const [gateName, setGateName] = useState(null);
+  const [gateName, setGateName] = useState('');
   const [plateNumberImage, setPlateNumberImage] = useState(''); // to be used to call doOCR()
   const [plateNumber, setPlateNumber] = useState(''); // to be used in validatePlateNo() and displayed to UI
   const [isTicketGenerated, setIsTicketGenerated] = useState(false); // will be used to render Ticket component
@@ -53,9 +55,7 @@ const CheckIn = () => {
 
   // Define function to run character recognition on an image
   const doOCR = useCallback(async () => {
-    const worker = await createWorker({
-      logger: m => console.log(m),
-    });
+    const worker = await createWorker();
     if (plateNumberImage) {
       await worker.loadLanguage('eng');
       await worker.initialize('eng');
@@ -126,6 +126,10 @@ const CheckIn = () => {
 
         return vehicleExists;
       }
+      console.log(
+        `🚀 ~ onGenerateTicketClicked ~ vehicleExists:`,
+        vehicleExists
+      );
 
       // Dispatch the generateTicket action creator
       const ticketObject = {
@@ -135,6 +139,7 @@ const CheckIn = () => {
         user: user.userName,
       };
       dispatch(createTicket(ticketObject));
+      console.log(`🚀 ~ onGenerateTicketClicked ~ ticketObject:`, ticketObject);
     }
 
     // setIsTicketGenerated(false)
