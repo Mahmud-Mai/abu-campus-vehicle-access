@@ -12,27 +12,28 @@ export const ticketsSlice = createSlice({
   name: 'tickets',
   initialState,
   reducers: {},
-  extraReducers: {
-    [fetchTickets.pending]: state => {
-      state.status = 'loading';
-    },
-    [fetchTickets.fulfilled]: (state, action) => {
-      state.status = 'success';
-      state.tickets = action.payload;
-    },
-    [fetchTickets.rejected]: (state, action) => {
-      state.status = 'failed';
-      state.error = action.error.message;
-    },
-    [createTicket.fulfilled]: (state, action) => {
-      const responseError =
-        action.payload === 'Request failed with status code 400' ||
-        action.payload === 'Request failed with status code 500';
-      if (!responseError) {
+  extraReducers: builder => {
+    builder
+      .addCase(fetchTickets.pending, state => {
+        state.status = 'loading';
+      })
+      .addCase(fetchTickets.fulfilled, (state, action) => {
         state.status = 'success';
-        state.newlyCreatedTicket = action.payload;
-      }
-    },
+        state.tickets = action.payload;
+      })
+      .addCase(fetchTickets.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message;
+      })
+      .addCase(createTicket.fulfilled, (state, action) => {
+        const responseError =
+          action.payload === 'Request failed with status code 400' ||
+          action.payload === 'Request failed with status code 500';
+        if (!responseError) {
+          state.status = 'success';
+          state.newlyCreatedTicket = action.payload;
+        }
+      });
   },
 });
 
