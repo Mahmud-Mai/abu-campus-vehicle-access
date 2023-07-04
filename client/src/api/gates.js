@@ -7,7 +7,7 @@ const url = `${baseUrl}/gates`;
 export const fetchGates = createAsyncThunk('gates/fetchGates', async () => {
   try {
     const response = await axios.get(url);
-    return [...response.data];
+    return response.data;
   } catch (error) {
     console.log(error.toJSON());
   }

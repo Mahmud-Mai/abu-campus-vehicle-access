@@ -10,17 +10,18 @@ export const gatesSlice = createSlice({
   name: 'gates',
   initialState,
   reducers: {},
-  extraReducers: {
-    [fetchGates.pending]: state => {
-      state.status = 'loading';
-    },
-    [fetchGates.fulfilled]: (state, action) => {
-      state.status = 'success';
-      state.gates = action.payload;
-    },
-    [fetchGates.rejected]: state => {
-      state.status = 'failed';
-    },
+  extraReducers: builder => {
+    builder
+      .addCase(fetchGates.pending, state => {
+        state.status = 'loading';
+      })
+      .addCase(fetchGates.fulfilled, (state, action) => {
+        state.status = 'success';
+        state.gates = action.payload;
+      })
+      .addCase(fetchGates.rejected, state => {
+        state.status = 'failed';
+      });
   },
 });
 

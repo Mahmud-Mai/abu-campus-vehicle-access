@@ -1,37 +1,48 @@
+// React-related imports
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Box, Button, Select, useToast } from '@chakra-ui/react';
+
+// External library imports
 import { createWorker } from 'tesseract.js';
-import { randomPlateNos } from '../../common/Constants'; // personally curated list of dummy plate Nos
-import { videoConstraints } from '../../common/Constants'; // for webcam config
+
+// Chakra UI imports:
+import { Box, Button, Select, useToast } from '@chakra-ui/react';
+
+// Custom constants imports
+import { randomPlateNos } from '../../common/Constants';
+import { videoConstraints } from '../../common/Constants';
+
+// Redux-related imports
 import { useDispatch, useSelector } from 'react-redux';
+
+// Components
 import PageHeading from '../../components/PageHeading';
 import TicketToBePrinted from './TicktetToBePrinted';
 import SnapPlateNumber from './SnapPlateNumber';
 import PreviewPlateNumber from './PreviewPlateNumber';
-import MalayPlate from '../../assets/GWA-946GG.jpg';
-import { selectAllUsers } from '../../features/users/userSlice';
-// import { createTicket } from '../../features/ticket/ticketsSlice';
-import { createTicket } from '../../api/tickets';
 
+// Assets
+import MalayPlate from '../../assets/GWA-946GG.jpg';
+
+// Redux slices and API imports
 import {
   fetchTGatesStatus,
   fetchAllGates,
 } from '../../features/gate/gateSlice';
+import { selectAllUsers } from '../../features/users/userSlice';
+import { createTicket } from '../../api/tickets';
 import { fetchGates } from '../../api/gates';
 import {
   createVehicleByPlateNumber,
   fetchVehicleByPlateNumber,
 } from '../../api/vehicles';
 
-// const worker = await createWorker(); // needed by tesseract
-
 const CheckIn = () => {
+  const dispatch = useDispatch();
   const toast = useToast();
-  const gates = useSelector(fetchAllGates);
   const gateStatus = useSelector(fetchTGatesStatus);
   const allUser = useSelector(selectAllUsers);
-  const dispatch = useDispatch();
   const userId = allUser[0].userId; // temporarily
+  const gates = useSelector(fetchAllGates);
 
   const [gateName, setGateName] = useState('');
   const [plateNumberImage, setPlateNumberImage] = useState(''); // to be used to call doOCR()
@@ -65,7 +76,6 @@ const CheckIn = () => {
       await worker.terminate();
       setPlateNumber(text);
       console.log(`🚀 ~ doOCR ~ text:`, text);
-      console.log(MalayPlate);
       toast({
         title: 'Account created.',
         position: 'top',
@@ -104,52 +114,58 @@ const CheckIn = () => {
     setIsPlateNumberValid(validatePlateNumber(plateNumber));
   }, [isPlateNumberValid, plateNumber]);
 
-  const onGenerateTicketClicked = async () => {
-    // Check if plateNumber is provided, fetch the associated Vehicle Then Create a ticket for the vehicle
-    if (plateNumber) {
-      // Check if vahicle exists and get the id
-      let vehicleExists = await dispatch(
-        fetchVehicleByPlateNumber(plateNumber)
-      ).unwrap();
-
-      // Else create the vehicle and get the Id
-      if (
-        !vehicleExists ||
-        vehicleExists === 'Request failed with status code 400'
-      ) {
-        let newVehicleExist;
-        // Create Vehicle
-        newVehicleExist = await dispatch(
-          createVehicleByPlateNumber(plateNumber)
-        ).unwrap();
-        vehicleExists = newVehicleExist;
-
-        return vehicleExists;
-      }
-      console.log(
-        `🚀 ~ onGenerateTicketClicked ~ vehicleExists:`,
-        vehicleExists
-      );
-
-      // Dispatch the generateTicket action creator
-      const ticketObject = {
-        plateNumber: vehicleExists._id,
+  // Function to create a ticket for a given vehicle ID
+  const createTicketForVehicle = async vehicleId => {
+    try {
+      const ticketFields = {
+        plateNumber: vehicleId,
         ticketStatus: 'Inbound',
         gate: gateName,
         user: user.userName,
       };
-      dispatch(createTicket(ticketObject));
-      console.log(`🚀 ~ onGenerateTicketClicked ~ ticketObject:`, ticketObject);
+      await dispatch(createTicket(ticketFields)).unwrap();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // Function to ensure the the scanned vehicles exists before creating a new ticket
+  const onGenerateTicketClicked = async () => {
+    if (plateNumber) {
+      try {
+        let vehicleExists = await dispatch(
+          fetchVehicleByPlateNumber(plateNumber)
+        ).unwrap();
+
+        if (
+          !vehicleExists ||
+          vehicleExists === 'Request failed with status code 400'
+        ) {
+          let newVehicleExist = await dispatch(
+            createVehicleByPlateNumber(plateNumber)
+          ).unwrap();
+          vehicleExists = newVehicleExist;
+        }
+
+        await createTicketForVehicle(vehicleExists._id);
+      } catch (error) {
+        console.log('An error occurred:', error);
+      }
     }
 
-    // setIsTicketGenerated(false)
     setIsTicketGenerated(true);
     setPlateNumberImage('');
   };
 
   // Fetch gates list on page load
   useEffect(() => {
-    gateStatus === 'idle' && dispatch(fetchGates());
+    const fetchGatesData = async () => {
+      if (gateStatus === 'idle') {
+        await dispatch(fetchGates()).unwrap();
+      }
+    };
+
+    fetchGatesData();
   }, [dispatch, gateStatus]);
 
   // This step is to ensure CardComponent becomes reusable
@@ -166,7 +182,7 @@ const CheckIn = () => {
     },
   ];
 
-  const availableGates =
+  const gatesData =
     typeof gates === 'object' ? (
       gates.map(({ _id, gateName }) => (
         <option key={_id} value={gateName}>
@@ -180,7 +196,7 @@ const CheckIn = () => {
   // Decide on UI to display
   let content;
   if (isTicketGenerated) {
-    content = <TicketToBePrinted gate={gateName} user={user} />;
+    content = <TicketToBePrinted />;
   } else if (plateNumberImage) {
     content = (
       <PreviewPlateNumber
@@ -199,7 +215,7 @@ const CheckIn = () => {
             placeholder="Select gate"
             onChange={e => setGateName(e.target.value)}
           >
-            {availableGates}
+            {gatesData}
           </Select>
         </Box>
         <Button

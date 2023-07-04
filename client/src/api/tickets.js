@@ -9,8 +9,7 @@ export const fetchTickets = createAsyncThunk(
   async () => {
     try {
       const response = await axios.get(url);
-      console.log(`🚀 ~ fetchTickets ~ response.data:`, response.data);
-      return [...response.data];
+      return response.data;
     } catch (error) {
       return error.message;
     }
@@ -19,15 +18,12 @@ export const fetchTickets = createAsyncThunk(
 
 export const createTicket = createAsyncThunk(
   'ticket/createTicket',
-  async ticketObject => {
-    // const stringifiedTicketObject = JSON.stringify(ticketObject);
+  async ticketFields => {
     try {
-      const response = await axios.post(url, ticketObject);
-      console.log(`🚀 ~ ticketObject:`, ticketObject);
-
+      const response = await axios.post(url, ticketFields);
       return response.data;
     } catch (error) {
-      console.log(error.toJSON());
+      return error.message;
     }
   }
 );

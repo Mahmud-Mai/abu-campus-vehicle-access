@@ -9,8 +9,7 @@ export const fetchVehicles = createAsyncThunk(
   async () => {
     try {
       const response = await axios.get(`${url}/by-plate-number`);
-      console.log(`🚀 ~ fetchVehicles ~ response:`, response);
-      return [...response.data];
+      return response.data;
     } catch (error) {
       return error.message;
     }
@@ -20,11 +19,14 @@ export const fetchVehicles = createAsyncThunk(
 export const fetchVehicleByPlateNumber = createAsyncThunk(
   'vehicles/fetchVehicleByPlateNumber',
   async plateNumber => {
-    const response = await axios.get(
-      `${url}/by-plate-number/?plateNumber=${plateNumber}`
-    );
-
-    return response.data;
+    try {
+      const response = await axios.get(
+        `${url}/by-plate-number/?plateNumber=${plateNumber}`
+      );
+      return response.data;
+    } catch (error) {
+      return error.message;
+    }
   }
 );
 
@@ -35,10 +37,7 @@ export const createVehicleByPlateNumber = createAsyncThunk(
       const response = await axios.post(
         `${url}/by-plate-number/?plateNumber=${plateNumber}`
       );
-      console.log(
-        `🚀 ~ createVehicleByPlateNumber ~ response.data:`,
-        response.data
-      );
+
       return response.data;
     } catch (error) {
       return error.message;
