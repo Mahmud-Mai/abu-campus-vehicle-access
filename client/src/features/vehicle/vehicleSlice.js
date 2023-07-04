@@ -39,6 +39,9 @@ export const vehiclesSlice = createSlice({
         state.status = 'failed';
         state.error = action.error.message;
       })
+      .addCase(fetchVehicleByPlateNumber.pending, state => {
+        state.status = 'loading';
+      })
       .addCase(fetchVehicleByPlateNumber.fulfilled, (state, action) => {
         state.status = 'success';
         const responseError =
@@ -48,6 +51,13 @@ export const vehiclesSlice = createSlice({
           state.vehicles.push(action.payload);
         }
       })
+      .addCase(fetchVehicleByPlateNumber.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message;
+      })
+      .addCase(createVehicleByPlateNumber.pending, state => {
+        state.status = 'loading';
+      })
       .addCase(createVehicleByPlateNumber.fulfilled, (state, action) => {
         state.status = 'success';
         const responseError =
@@ -56,6 +66,10 @@ export const vehiclesSlice = createSlice({
         if (!responseError) {
           state.vehicles.push(action.payload);
         }
+      })
+      .addCase(createVehicleByPlateNumber.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message;
       });
   },
 });
