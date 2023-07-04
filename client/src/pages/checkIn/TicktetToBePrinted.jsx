@@ -1,4 +1,7 @@
+// React-related imports
 import React from 'react';
+
+// Chakra UI imports:
 import CardComponent from '../../components/CardComponent';
 import {
   Box,
@@ -9,50 +12,60 @@ import {
   StackDivider,
   Text,
 } from '@chakra-ui/react';
-import QrcodeComponent from '../../components/QrcodeComponent';
-import { useSelector } from 'react-redux';
-import { fetchNewlyCreatedTicket } from '../../features/ticket/ticketsSlice';
 
-const TicktetToBePrinted = ({ ticketId, plateNumber }) => {
-  const ticket = useSelector(fetchNewlyCreatedTicket);
-  console.log(`🚀 ~ TicktetToBePrinted ~ ticket:`, ticket);
+// Components
+import QrcodeComponent from '../../components/QrcodeComponent';
+
+// Redux-related imports
+import { useSelector } from 'react-redux';
+
+// Redux slices and API imports
+import {
+  fetchNewlyCreatedTicket,
+  getTicketsListStatus,
+} from '../../features/ticket/ticketsSlice';
+
+const TicktetToBePrinted = () => {
+  const NewTicket = useSelector(fetchNewlyCreatedTicket);
+  const lastTicket = NewTicket?.slice(-1)[0];
+  console.log('🚀 ~ TicktetToBePrinted ~ lastTicket:', lastTicket);
 
   let content;
-  if (ticket) {
+  if (getTicketsListStatus !== 'loading') {
     content = (
       <Stack divider={<StackDivider />} width={'24rem'} spacing="5">
         <Flex justify={'space-between'}>
           <Box>Ticket Id:</Box>
-          <Text> {ticket._id}</Text>
+          <Text> {lastTicket._id}</Text>
         </Flex>
         <Flex justify={'space-between'}>
           <Box>Vehicle Plate Number:</Box>
-          <Text> {ticket.plateNumber}</Text>
+          <Text> {lastTicket.plateNumber}</Text>
         </Flex>
         <Flex justify={'space-between'}>
           <Box>Passage Type</Box>
-          <Text> {ticket.ticketStatus}</Text>
+          <Text> {lastTicket.ticketStatus}</Text>
         </Flex>
         <Flex justify={'space-between'}>
           <Box>Gate Used:</Box>
-          <Text>{ticket.gate}</Text>
+          <Text>{lastTicket.gate}</Text>
         </Flex>
         <Flex justify={'space-between'}>
           <Box>Time:</Box>
-          <Text>{ticket.createdAt}</Text>
+          <Text>{lastTicket.createdAt}</Text>
         </Flex>
         <Flex justify={'space-between'}>
           <Box>Security Personnel:</Box>
-          <Text>{ticket.user}</Text>
+          <Text>{lastTicket.user}</Text>
         </Flex>
         <Flex justify={'center'}>
-          <QrcodeComponent ticketId={ticket._id} />
+          <QrcodeComponent ticketId={lastTicket._id} />
         </Flex>
       </Stack>
     );
   } else {
     content = (
-      <Flex align={'center'} height={200}>
+      <Flex mx="auto" align={'center'} height={200}>
         <Spinner
           thickness="4px"
           speed="0.65s"
