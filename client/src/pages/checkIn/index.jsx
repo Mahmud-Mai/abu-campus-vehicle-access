@@ -21,7 +21,13 @@ import SnapPlateNumber from './SnapPlateNumber';
 import PreviewPlateNumber from './PreviewPlateNumber';
 
 // Assets
-import MalayPlate from '../../assets/GWA-946GG.jpg';
+// import MalayPlate from '../../assets/GWA-946GG.jpg';
+import img1 from '../../assets/plate-numbers/1.png';
+import img2 from '../../assets/plate-numbers/2.png';
+import img3 from '../../assets/plate-numbers/3.png';
+import img4 from '../../assets/plate-numbers/4.png';
+import img5 from '../../assets/plate-numbers/5.png';
+import img6 from '../../assets/plate-numbers/6.png';
 
 // Redux slices and API imports
 import {
@@ -77,7 +83,6 @@ const CheckIn = () => {
       setPlateNumber(text);
       console.log(`🚀 ~ doOCR ~ text:`, text);
       toast({
-        title: 'Account created.',
         position: 'top',
         render: () => (
           <Box color="white" mt={12} p={3} bg="blue.500">
@@ -91,7 +96,7 @@ const CheckIn = () => {
   }, [plateNumberImage, toast]);
 
   // Define function to check for Nigerian plate Number formats
-  const validatePlateNumber = testSubject => {
+  const testPlateNumber = testSubject => {
     const regex = /^[A-Z]{3}-\d{3}[A-Z]{2}$/;
     return regex.test(testSubject);
   };
@@ -100,9 +105,15 @@ const CheckIn = () => {
   const generateRandomPlateNumber = () => {
     const plateNumber =
       randomPlateNos[Math.floor(Math.random() * randomPlateNos.length)];
-    setIsPlateNumberValid(validatePlateNumber(plateNumber));
+    setIsPlateNumberValid(testPlateNumber(plateNumber));
     setPlateNumber(plateNumber);
   };
+
+  // Random Dummy Plate number Image logic
+  const imagePaths = [img1, img2, img3, img4, img5, img6];
+
+  const randomImagePath =
+    imagePaths[Math.floor(Math.random() * imagePaths.length)];
 
   // Run doOCR either on image capture or when a dummy plateNumberImage is provided
   useEffect(() => {
@@ -111,7 +122,7 @@ const CheckIn = () => {
 
   // Run the validatePlateNumber function defined above
   useEffect(() => {
-    setIsPlateNumberValid(validatePlateNumber(plateNumber));
+    setIsPlateNumberValid(testPlateNumber(plateNumber));
   }, [isPlateNumberValid, plateNumber]);
 
   // Function to create a ticket for a given vehicle ID
@@ -131,7 +142,29 @@ const CheckIn = () => {
 
   // Function to ensure the the scanned vehicles exists before creating a new ticket
   const onGenerateTicketClicked = async () => {
-    if (plateNumber) {
+    if (!isPlateNumberValid) {
+      toast({
+        position: 'top',
+        render: () => (
+          <Box color="white" mt={12} p={3} bg="red.500">
+            {!isPlateNumberValid && 'Please Provide a valid Plate Number'}
+          </Box>
+        ),
+        duration: 5000,
+        isClosable: true,
+      });
+    } else if (!gateName) {
+      toast({
+        position: 'top',
+        render: () => (
+          <Box color="white" mt={12} p={3} bg="red.500">
+            {!gateName && 'Please select an entry gate'}
+          </Box>
+        ),
+        duration: 5000,
+        isClosable: true,
+      });
+    } else {
       try {
         let vehicleExists = await dispatch(
           fetchVehicleByPlateNumber(plateNumber)
@@ -151,10 +184,10 @@ const CheckIn = () => {
       } catch (error) {
         console.log('An error occurred:', error);
       }
-    }
 
-    setIsTicketGenerated(true);
-    setPlateNumberImage('');
+      setIsTicketGenerated(true);
+      setPlateNumberImage('');
+    }
   };
 
   // Fetch gates list on page load
@@ -221,7 +254,8 @@ const CheckIn = () => {
         <Button
           m={5}
           onClick={() => {
-            setPlateNumberImage(MalayPlate);
+            setPlateNumberImage(randomImagePath);
+            console.log(`🚀 ~ CheckIn ~ randomImagePath:`, randomImagePath);
           }}
         >
           Fetch Dummy PlateNumber Image
