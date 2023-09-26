@@ -18,6 +18,7 @@ const CamComponent = ({ webcamRef, videoConstraints }) => {
           audio={false}
           height={400}
           ref={webcamRef}
+          margin={'auto'}
           width={400}
           screenshotFormat="image/jpeg"
           videoConstraints={videoConstraints}

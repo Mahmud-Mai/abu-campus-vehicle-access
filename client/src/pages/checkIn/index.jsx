@@ -97,7 +97,7 @@ const CheckIn = () => {
 
   // Define function to check for Nigerian plate Number formats
   const testPlateNumber = testSubject => {
-    const regex = /^[A-Z]{3}-\d{3}[A-Z]{2}$/;
+    const regex = /^[A-Z]{3}-\d{2,3}[A-Z]{2}$/;
     return regex.test(testSubject);
   };
 
@@ -255,7 +255,7 @@ const CheckIn = () => {
           m={5}
           onClick={() => {
             setPlateNumberImage(randomImagePath);
-            console.log(`🚀 ~ CheckIn ~ randomImagePath:`, randomImagePath);
+            // console.log(`🚀 ~ CheckIn ~ randomImagePath:`, randomImagePath);
           }}
         >
           Fetch Dummy PlateNumber Image
